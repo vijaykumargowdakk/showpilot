@@ -128,6 +128,12 @@ const cut = await loadCut(args.find((a, i) => !a.startsWith('--') && !args[i - 1
 const narration = cut.silent ? null : loadNarration(cut.id);
 if (cut.silent) console.log('Silent cut: each line is paced for reading.');
 else if (!narration) console.log('No narration yet (showpilot voice); pacing beats by estimated line lengths.');
+// A running app is the most common thing to forget: say so now, not after the browser has been waiting.
+const needsApp = cut.chapters.some((c, i) => (only === null ? i >= from : only === i) && ((c.kind ?? 'app') === 'app' || (c.kind === 'scene' && c.broll)));
+if (needsApp && config.app.url) {
+  const reachable = await fetch(config.app.url, { signal: AbortSignal.timeout(5000) }).then(() => true, () => false);
+  if (!reachable) throw new Error(`nothing is answering at ${config.app.url}. Start your app (for example \`npm run dev\`) and try again, or change app.url in showpilot.config.ts. To film a built folder instead, use app.serve.`);
+}
 const server = config.app.serve ? await serve(fromProject(config.app.serve)) : null;
 if (server) console.log(`Serving ${config.app.serve} at ${server.url}`);
 try {
