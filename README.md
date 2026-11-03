@@ -44,21 +44,23 @@ The stages run one at a time, so recording is never slowed down by anything else
 
 Requirements: **Node 20+**, **ffmpeg** on your PATH, and for narration **Python 3.10–3.12**. Windows, macOS and Linux.
 
-```sh
-npm install --save-dev showpilot
-npx showpilot                        # a menu: start a video, make one, pick a narrator, check your setup
-```
-
-Or by command:
+Open a terminal in your project and run **one command**:
 
 ```sh
-npx showpilot new launch             # asks: purpose, audience, length, tone, who narrates, who writes the script
-npx showpilot setup-voice            # optional: the narrator (Python environment + Kokoro, about 1–3 GB with torch)
+npx showpilot
 ```
 
-The browser it films with downloads by itself the first time you record (about 700 MB, once). Then ask your AI
-assistant to *"make the launch video with Showpilot"* (it follows the guide `new` installs), or write it yourself.
-Either way, one command makes the video:
+That's the whole setup. It asks questions you answer with the arrow keys (or a number), and does the rest:
+- creates a `video` folder next to your app, and installs Showpilot there;
+- suggests how to reach your app (a web address or built folder, guessed from your `package.json`);
+- asks what the video is for, how long, the tone, who narrates it and who writes the script;
+- offers to set up the narrator voice (a 1–3 GB download), and plays samples so you can pick one.
+
+Run `npx showpilot` again later and it shows a menu: make a video, start another, pick a voice, check your setup.
+The browser it films with downloads by itself the first time you record (about 700 MB, once).
+
+Then ask your AI assistant to *"make the launch video with Showpilot"* (it follows the guide the setup installs), or write
+it yourself. Either way, one command makes the video:
 
 ```sh
 npx showpilot make launch            # check → narrate → record → render: out/launch/launch.mp4 (+ .srt, script, chapters)
