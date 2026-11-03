@@ -5,6 +5,15 @@ project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- `showpilot new`: a guided start that asks the purpose, audience, length, tone, narrator and who writes the script, and writes a brief (`cuts/<id>.brief.md`). Every question also has a flag.
+- Tone presets (energetic, professional, friendly, calm, playful) set the narrator's energy and speed and the audition line.
+- `showpilot voices` lets you pick a narrator from the samples: a "Use this voice" button on a local page, or a number in the terminal. The pick is written into `showpilot.config.ts`.
+- `showpilot assistant`: a Claude Code skill and an AGENTS.md section, so your AI coding assistant writes, records and renders the video, asking about anything the brief leaves open.
+- Scripts written in Markdown (`cuts/<id>.script.md`): `showpilot script` turns them into a cut, with hand-written actions kept in `cuts/<id>.actions.ts`.
+- `showpilot dictate`: talk a video through (from the microphone, or any recording), transcribed on your computer with faster-whisper (`setup-voice --dictation`).
+- `showpilot align`: your own recorded voiceover, found line by line and placed onto a rendered silent cut.
+- `check` compares the cut's length with the brief; `doctor` reports dictation.
+- The showcase now says who writes the script (your AI assistant, or you), and its opening keeps the app moving.
 - `app.title` sets the window's title bar text, when the video's brand isn't the app's name.
 - Web chapters show the site's host (e.g. github.com) in the window's title bar instead of the brand.
 - A showcase video, made with Showpilot from `examples/showcase`.

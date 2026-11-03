@@ -64,7 +64,7 @@ def main():
     shown = re.sub(r"\s+", " ", re.sub(r"\[pause [\d.]+\]|\||\*|</?(slow|fast|up)>", " ", PHONEMES.sub(r"\1", opts.line))).strip()
     (out / "samples.json").write_text(json.dumps(rows, indent=2), encoding="utf-8")
     (out / "index.html").write_text(page("Showpilot voice audition", shown, rows), encoding="utf-8")
-    print(f"\nAudition page: {out / 'index.html'}\nPut the one you like in showpilot.config.ts: voice: {{ mix: {{ ... }}, speed: ..., energy: 1 }}")
+    print(f"\nSamples: {out / 'index.html'}")
 
 
 def page(title, line, rows) -> str:

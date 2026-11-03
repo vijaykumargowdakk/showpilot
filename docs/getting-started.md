@@ -21,11 +21,12 @@ In the project you want to film (or in a folder of its own):
 ```sh
 npm install --save-dev showpilot
 npx showpilot setup-browser
-npx showpilot init
+npx showpilot new
 npx showpilot doctor
 ```
 
-`init` creates:
+`new` asks what the video is for, how long it should be, its tone, who narrates it and who writes the script, then
+sets everything up (see [starting a video](new-video.md)). `npx showpilot init` makes a minimal project instead. It creates:
 
 - `showpilot.config.ts`: the app to record, the brand, the narrator (see [configuration](configuration.md))
 - `cuts/tour.ts`: a first script (see [writing cuts](writing-cuts.md))
@@ -35,7 +36,8 @@ Optional, for narration:
 
 ```sh
 npx showpilot setup-voice   # creates the Python environment and downloads Kokoro
-npx showpilot voices        # writes out/voices/index.html: listen and pick
+npx showpilot voices        # listen to the narrators and pick one (page button or number)
+npx showpilot setup-voice --dictation   # optional: dictate scripts and align your own voice
 ```
 
 `setup-voice` looks for Python 3.12, 3.11 or 3.10 on the PATH; set `SHOWPILOT_PYTHON` to use a specific one.

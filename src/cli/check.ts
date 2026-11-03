@@ -1,6 +1,10 @@
 // showpilot check <cut>: loads the config and the cut, and lists the chapters with their lines and a length estimate.
 // It opens no browser, so it is quick, and CI can run it to catch a broken config or cut.
+import { existsSync, readFileSync } from 'node:fs';
+import path from 'node:path';
 import { loadConfig, loadCut } from '../config';
+import { formatLength, readBrief } from '../guide/brief';
+import { PROJECT } from '../paths.mjs';
 import { lineSeconds, narratedLines } from '../recorder/script';
 
 const config = await loadConfig();
@@ -23,5 +27,14 @@ cut.chapters.forEach((c, i) => {
 if (!cut.silent && !config.voice) problems.push('this cut is narrated but showpilot.config.ts has no voice (or make the cut silent: true)');
 if (cut.thumbnail && !cut.chapters[cut.thumbnail.chapter - 1]) problems.push(`thumbnail.chapter ${cut.thumbnail.chapter} does not exist`);
 console.log(`\n${narratedLines(cut).length} lines, about ${Math.floor(total / 60)} min ${Math.round(total % 60)} s before actions are timed`);
+// The brief's target length: more than 20% off is worth a rewrite before recording.
+const briefFile = path.join(PROJECT, 'cuts', `${cut.id}.brief.md`);
+if (existsSync(briefFile)) {
+  const brief = readBrief(readFileSync(briefFile, 'utf8'));
+  const off = total / brief.length - 1;
+  const target = `the brief's ${formatLength(brief.length)}`;
+  if (Math.abs(off) > 0.2) console.log(`  ~ ${Math.round(Math.abs(off) * 100)}% ${off > 0 ? 'longer' : 'shorter'} than ${target}: ${off > 0 ? 'trim lines or chapters' : 'add a moment or two'}, or change the brief`);
+  else console.log(`  ok  close to ${target} (${brief.tone}, ${brief.purpose})`);
+}
 for (const p of problems) console.log(`  ! ${p}`);
 process.exit(problems.length ? 1 : 0);

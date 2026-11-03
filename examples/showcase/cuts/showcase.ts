@@ -1,9 +1,17 @@
-// Showpilot's own showcase (about 75 s, narrated): what it does, shown by doing it, on the example app.
+// Showpilot's own showcase (about 90 s, narrated): what it does, shown by doing it, on the example app.
 // npx showpilot voice showcase && npx showpilot record showcase && npx showpilot render showcase
-import { beat, chapter, cut, scene, web, type Studio } from 'showpilot';
+import type { Locator } from 'playwright';
+import { beat, chapter, cut, scene, web, type Box, type Studio } from 'showpilot';
 import { REPO } from '../showpilot.config';
 
 const task = (s: Studio, title: string) => s.page.getByRole('checkbox', { name: `Done: ${title}` });
+
+/** The part of an element that is on screen, so a tall diagram is framed where it can be seen. */
+async function onScreen(target: Locator): Promise<Box> {
+  const b = (await target.boundingBox())!;
+  const y = Math.max(60, b.y);
+  return { x: b.x, y, width: b.width, height: Math.min(1060, b.y + b.height) - y };
+}
 
 /** Behind the opening words: the app being used, in a tilted window. */
 async function broll(s: Studio) {
@@ -14,6 +22,16 @@ async function broll(s: Studio) {
   await s.click(task(s, 'Plan the next sprint'));
   await s.wait(0.8);
   await s.click(s.page.getByRole('button', { name: 'Done', exact: true }));
+  // The opening runs for about 25 s, so the app keeps being used for all of it.
+  for (const [filter, task] of [['All', 'Review the pull request'], ['Open', 'Book the team lunch'], ['All', 'Write the release notes']]) {
+    await s.wait(1.2);
+    await s.click(s.page.getByRole('button', { name: filter, exact: true }));
+    await s.wait(0.8);
+    await s.type(s.page.getByLabel('New task'), task);
+    await s.press('Enter');
+  }
+  await s.wait(1);
+  await s.click(task(s, 'Write the launch post'));
 }
 
 export default cut({
@@ -25,9 +43,10 @@ export default cut({
       'kinetic',
       [
         beat({ say: 'This video was not recorded by hand. || And nobody edited it.' }),
-        beat({ say: '<up>It was *written*.</up> || A short script, | and *Showpilot* did the rest.' }),
+        beat({ say: "<up>It was written down,</up> | as a script. || Not by me, though. | The AI assistant I code with wrote it, | because it already knows the codebase." }),
+        beat({ say: 'Or write it yourself, | dictate it, | or read it in your own voice. || Then *Showpilot* does the rest.' }),
       ],
-      { broll, props: { highlight: ['written', 'script'] } },
+      { broll, props: { highlight: ['written', 'assistant', 'script', 'Showpilot'] } },
     ),
 
     chapter('It drives your real app', [
@@ -58,11 +77,11 @@ export default cut({
     scene(
       'Everything a launch needs',
       'badges',
-      [beat({ say: "There's a *narrator* that runs on your own computer. | *Subtitles* for every line. | And *thumbnails* and chapters, | from the same script." })],
+      [beat({ say: "Pick a *narrator* from samples, | in the tone you want. | *Subtitles* for every line. | And *thumbnails* and chapters, | from the same script." })],
       {
         props: {
           badges: [
-            { word: 'narrator', title: 'A natural narrator', sub: 'Kokoro voices, on your own GPU or CPU' },
+            { word: 'narrator', title: 'A narrator you pick', sub: 'From samples, in your tone, on your own computer' },
             { word: 'subtitles', title: 'Subtitles', sub: '.srt, a timed script, and chapters' },
             { word: 'thumbnails', title: 'Thumbnails', sub: 'From any moment of the recording' },
           ],
@@ -73,7 +92,7 @@ export default cut({
 
     web('The script', `${REPO}/blob/main/examples/hello/cuts/tour.ts`, [
       beat({
-        say: "Here's a whole video's script: | a few dozen lines of TypeScript.",
+        say: "Here's a whole video's script. | Your assistant writes it, | and you change whatever you like.",
         camera: 'wide',
         do: async (s) => {
           await s.moveTo({ x: 1100, y: 600 });
@@ -81,9 +100,33 @@ export default cut({
         },
       }),
       beat({
-        say: 'Change your app, | run it again, | and the video is *re-shot*. || In one command.',
+        say: 'Change your app, | run it again, | and the whole video is recorded again. || In one command.',
         camera: 'wide',
         do: async (s) => s.scroll(600, 3),
+      }),
+    ]),
+
+    // A codebase walkthrough, the kind of chapter a deep dive is made of: Showpilot explaining its own repository.
+    web('Your code, explained', `${REPO}/blob/main/README.md`, [
+      beat({
+        say: 'It can walk people through your codebase, too. | Here, the architecture, | straight from the README.',
+        do: async (s) => {
+          s.wide();
+          await s.scrollTo(s.page.locator('[id="user-content-how-it-works"]'), 1.6, 90);
+          await s.wait(1.2);
+          await s.focus(await onScreen(s.page.locator('[id="user-content-how-it-works"]').locator('xpath=following::section[@data-type="mermaid"][1]')), 1.5);
+        },
+      }),
+      beat({
+        say: 'Then the folders, | and the code itself, | one file at a time. || Perfect for onboarding, | or a deep dive.',
+        camera: 'wide',
+        do: async (s) => {
+          await s.goto(`${REPO}/tree/main/src`);
+          await s.wait(0.6);
+          await s.goto(`${REPO}/blob/main/src/video/camera.ts`);
+          await s.moveTo({ x: 1100, y: 650 });
+          await s.scroll(500, 2);
+        },
       }),
     ]),
 

@@ -18,7 +18,7 @@
     "lint": "eslint .",
     "filemap": "node scripts/filemap.mjs",
     "test": "vitest run",
-    "check:example": "node bin/showpilot.mjs check tour --project examples/hello && node bin/showpilot.mjs check showcase --project examples/showcase",
+    "check:example": "node bin/showpilot.mjs check tour --project examples/hello && node bin/showpilot.mjs check quick --project examples/hello && node bin/showpilot.mjs check showcase --project examples/showcase",
     "ci": "npm run typecheck && npm run lint && npm test && npm run check:example"
   },
   "dependencies": {

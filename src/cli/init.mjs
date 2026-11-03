@@ -16,7 +16,8 @@ export default defineConfig({
     ready: 'body',
   },
   brand: { name: '${name}', links: [{ label: 'Try it', url: 'https://example.com' }] },
-  // Pick a narrator with \`showpilot voices\`, then set it here, e.g.:
+  // The narrator: \`showpilot voices\` lets you hear them all and writes your pick on the line below.
+  // showpilot:voice
   // voice: { mix: { am_fenrir: 0.7, am_eric: 0.3 }, speed: 0.92, energy: 1 },
 });
 `,
@@ -58,3 +59,4 @@ if (!existsSync(ignore) || !readFileSync(ignore, 'utf8').split('\n').includes('o
   console.log('  updated  .gitignore (out/)');
 }
 console.log(`\nNext:\n  npm install --save-dev showpilot\n  npx showpilot check tour\n  npx showpilot record tour\n  npx showpilot render tour`);
+console.log('\nOr let Showpilot ask what the video is for (length, tone, narrator, who writes it): npx showpilot new');

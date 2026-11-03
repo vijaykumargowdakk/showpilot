@@ -20,22 +20,25 @@ if (project) process.env.SHOWPILOT_PROJECT = path.resolve(project);
 if (home) process.env.SHOWPILOT_HOME = path.resolve(home);
 
 // Imported after the flags are applied, because paths.mjs reads them once.
-const { env, PKG, PYTHON, REDIRECTS, VOICE_DIR } = await import('../src/paths.mjs');
+const { env, PKG, PYTHON, REDIRECTS } = await import('../src/paths.mjs');
 const { acquire, release } = await import('../src/cli/lock.mjs');
 
 const ts = (file) => [process.execPath, ['--import', import.meta.resolve('tsx'), path.join(PKG, file)]];
 const js = (file) => [process.execPath, [path.join(PKG, file)]];
-const py = (file) => [PYTHON, [path.join(VOICE_DIR, file)]];
 
 /** name → [what it does, how to run it, the lock it holds] */
 const COMMANDS = {
-  init: ['Create a project here: showpilot.config.ts, a first cut and .gitignore', js('src/cli/init.mjs')],
+  new: ['Start a video: asks its purpose, length, tone, narrator and who writes the script', ts('src/cli/new.ts')],
+  assistant: ['Install the guide your AI coding assistant uses to write videos (Claude Code skill, AGENTS.md)', ts('src/cli/assistant.ts')],
+  script: ['Turn the script you wrote (cuts/<id>.script.md) into a cut', ts('src/cli/script.ts')],
+  init: ['Create a minimal project here: showpilot.config.ts, a first cut and .gitignore', js('src/cli/init.mjs')],
   doctor: ['Check Node, Python, ffmpeg, the browser and the voice setup', js('src/cli/doctor.mjs')],
   where: ['List every folder Showpilot uses, with sizes', js('src/cli/where.mjs')],
   'setup-browser': ['Download the Chromium that Playwright drives (into SHOWPILOT_HOME)', [process.execPath, [path.join(path.dirname(fileURLToPath(import.meta.resolve('playwright'))), 'cli.js'), 'install', 'chromium']]],
   'setup-voice': ['Create the Python environment and download Kokoro (into SHOWPILOT_HOME)', js('src/voice/setup.mjs')],
-  voices: ['Audition narrator voices: out/voices/index.html', py('audition.py'), 'voice'],
+  voices: ['Hear the narrators and pick one (a page with buttons, or a number here)', ts('src/cli/voices.ts'), 'voice'],
   check: ['Load the config and a cut, and list its chapters and lines (no browser)', ts('src/cli/check.ts')],
+  listen: ['Listen back to the narration and list words the narrator says wrongly', ts('src/cli/listen.ts'), 'voice'],
   voice: ['Speak every line of a cut with the configured voice', ts('src/cli/voice.ts'), 'voice'],
   record: ['Drive the app and record each chapter (--chapter N, --from N)', ts('src/recorder/record.ts'), 'record'],
   render: ['Render the video (--clean: no captions or audio; --still 300,900: frames as PNGs)', ts('src/cli/render.ts'), 'render'],
@@ -43,6 +46,8 @@ const COMMANDS = {
   subtitles: ['Write the .srt, the timestamped script and the chapter list', ts('src/cli/subtitles.ts')],
   dub: ['Lay narration over a rendered silent cut, without rendering again', ts('src/cli/dub.ts'), 'dub'],
   frames: ['Contact sheet of recorded frames, to check a take (ch:beat ...)', ts('src/cli/frames.ts')],
+  dictate: ['Talk the video through (--record, or an audio file); it becomes cuts/<id>.script.md', ts('src/cli/dictate.ts')],
+  align: ['Put your own recorded voiceover on a rendered silent cut, line by line', ts('src/cli/align.ts'), 'dub'],
 };
 
 const command = args.shift();

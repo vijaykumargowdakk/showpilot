@@ -3,6 +3,12 @@
 A **cut** is one video: a list of **chapters**, each a list of **beats**. Cuts live in `cuts/<id>.ts` and export
 `cut({ … })` as the default.
 
+There are three ways to get one:
+- **Your AI assistant writes it** (see [assistants](assistants.md)). This is the easiest, since it already knows your code.
+- **You write the words** in a Markdown script, and Showpilot generates the cut (see
+  [below](#writing-the-script-yourself)).
+- **You write the TypeScript** directly, as described on this page.
+
 ```ts
 import { beat, chapter, cut, scene, web } from 'showpilot';
 
@@ -120,3 +126,50 @@ thumbnail: {
 
 `showpilot frames <cut> 2:0 2:1 3:0` puts the screenshots from the end of those beats (chapter:beat, beats from 0)
 side by side in `out/<cut>/frames-….jpg`. It's quicker than rendering to see whether an action did what you meant.
+
+## Writing the script yourself
+
+Prefer to write the words and leave the code to someone else? Write `cuts/<id>.script.md`:
+
+```markdown
+# Taskly in 30 seconds
+
+## [kinetic] Hello
+Thirty seconds. | One app. || <up>Let's go!</up>
+
+## The basics
+Add a task: | type it, | and press Enter.
+> do: type "Call the designer" into New task and press Enter
+
+Done? | Tick it off, | and watch the progress bar.
+> do: tick "Plan the next sprint"
+
+## [web https://github.com/acme/taskly] The code
+Here's the repository.
+
+## [cta] That's it
+That's Taskly. || Thanks for watching!
+```
+
+| Line | |
+|---|---|
+| `# Title` | The video's title |
+| `## Chapter` | A recorded chapter of the app |
+| `## [kinetic] …`, `## [badges] …`, `## [cta] …` | A drawn scene |
+| `## [web https://…] …` | A recorded web page |
+| A paragraph | One narration line, with [delivery marks](voice.md#writing-lines-to-be-spoken) |
+| `> do: …` | What happens on screen during the line above, in plain words |
+
+Then:
+
+```sh
+npx showpilot script quick
+```
+
+This writes `cuts/quick.ts`, regenerated every time, and adds a stub to **`cuts/quick.actions.ts`** for each `> do:`
+note. That file is yours: fill in each action with Studio calls (or ask your AI assistant to), and `script` never
+changes what you've written there. Actions are matched by their note, so you can rewrite the narration freely. If a
+note no longer exists, `script` points out its now-unused action. The example in `examples/hello/cuts/quick.*`
+shows all three files.
+
+You can also [dictate](voice.md#dictating-the-script) the script instead of typing it.

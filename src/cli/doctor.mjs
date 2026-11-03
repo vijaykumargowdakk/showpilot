@@ -50,6 +50,9 @@ else {
     const where = { cuda: `the NVIDIA GPU (${gpu.join(' ')})`, mps: 'the Apple GPU', cpu: 'the CPU (slower, but fine)' }[device];
     ok(`torch ${torch}, speaking on ${where}`);
   }
+  const whisper = spawnSync(PYTHON, ['-c', 'import faster_whisper'], { env: env() }).status === 0;
+  if (whisper) ok('dictation ready (faster-whisper): showpilot dictate, and transcript-matched showpilot align');
+  else warn('dictation not installed (optional): showpilot setup-voice --dictation');
 }
 
 console.log(failed ? '\nDoctor found problems (see FAIL above).' : '\nAll good.');
