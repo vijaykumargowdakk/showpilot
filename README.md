@@ -2,7 +2,7 @@
 
 ![A Showpilot video: the camera follows typing in a to-do app, with subtitles](docs/media/showcase.gif)
 
-*A clip from Showpilot's own 77-second showcase, made with Showpilot from [`examples/showcase`](examples/showcase):
+*A clip from Showpilot's own 94-second showcase, made with Showpilot from [`examples/showcase`](examples/showcase):
 [watch the full video](https://github.com/vijaykumargowdakk/showpilot/releases/download/v0.1.0/showpilot-showcase.mp4).*
 
 **Scripted product demo videos that look hand-made.** Tell Showpilot what the video is for, how long and in what
