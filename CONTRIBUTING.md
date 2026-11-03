@@ -31,11 +31,12 @@ Set `SHOWPILOT_HOME` if you want the browser and caches somewhere other than `~/
 | `src/video/` | The planner (camera, cursor, captions per frame), subtitles, and the Remotion compositions |
 | `src/voice/` | The Python side: Kokoro engine, delivery marks, narration, audition, setup |
 | `examples/hello/` | A tiny example app and cut, also used by CI |
+| `scripts/` | Repo tooling, not published (`filemap.mjs` writes FILEMAP.md) |
 | `docs/` | User documentation |
 
 ## Pull requests
 
-1. Branch from `main` (`feat/…`, `fix/…`, `docs/…`). Never push to `main` directly.
+1. Branch from `main` (`feat/…`, `fix/…`, `docs/…`, `chore/…`). Never push to `main` directly.
 2. Keep each PR to one change, with tests for logic you add (`*.test.ts` next to the code, run with Vitest).
 3. Run `npm run ci` before pushing. CI runs it on Windows, macOS and Linux.
 4. Update the docs and `CHANGELOG.md` (under *Unreleased*) when behaviour changes.

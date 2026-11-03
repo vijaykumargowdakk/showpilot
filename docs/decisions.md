@@ -39,3 +39,10 @@ Lines written to be read sound flat when spoken, so beats can carry a separate `
 
 **Videos carry no branding of Showpilot's.** No watermark, logo or credit line is ever added to a render; what is on
 screen comes only from the project's own config and cuts. Credit is a matter for the code (the MIT notice), not the videos.
+
+**2026-11-03: Project notes and hooks for AI coding sessions.** PROJECT_STATUS.md tracks where things stand,
+FILEMAP.md maps every file, and `.claude/settings.json` hooks regenerate the map and review edited files at the end
+of each turn; this log stays the decision record. The map is made by a Node script, since Node is already needed and
+Python isn't for contributors, and it lists paths only: sizes and times differ between checkouts and between
+Windows and Linux line endings, so they would change on every edit and make parallel PRs conflict. Maintainer's
+input: asked for this setup, and for branches named `feat/…`, `fix/…` and so on rather than tool-generated names.
