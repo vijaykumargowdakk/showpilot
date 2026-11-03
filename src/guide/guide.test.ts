@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatLength, parseLength, readBrief, TONES, writeBrief, type Brief } from './brief';
+import { withSection } from './assistant';
 import { setVoice } from './config-edit';
 
 const brief: Brief = {
@@ -64,5 +65,20 @@ describe('writing the voice into the config', () => {
   it('adds one after defineConfig({ when there is none, and gives up on anything else', () => {
     expect(setVoice("export default defineConfig({\n  app: { url: 'x' },\n});\n", v)).toMatch(/^export default defineConfig\(\{\n {2}voice: /);
     expect(setVoice('export default config;', v)).toBeNull();
+  });
+});
+
+describe('the AGENTS.md section', () => {
+  const section = '<!-- showpilot:start (x) -->\n## Product videos\nnew\n<!-- showpilot:end -->\n';
+  it('is added to a new or existing file, and replaced in place on update, keeping the rest', () => {
+    expect(withSection('', section)).toBe(section);
+    const first = withSection('# Rules\n\nBe kind.\n', section);
+    expect(first).toBe('# Rules\n\nBe kind.\n\n' + section);
+    const old = first.replace('new', 'old') + '\n## Mine\nkeep\n';
+    const updated = withSection(old, section);
+    expect(updated).toContain('Be kind.');
+    expect(updated).toContain('## Mine\nkeep');
+    expect(updated).toContain('new');
+    expect(updated).not.toContain('old');
   });
 });

@@ -16,7 +16,8 @@ export default defineConfig({
     ready: 'body',
   },
   brand: { name: '${name}', links: [{ label: 'Try it', url: 'https://example.com' }] },
-  // Pick a narrator with \`showpilot voices\`, then set it here, e.g.:
+  // The narrator: \`showpilot voices\` lets you hear them all and writes your pick on the line below.
+  // showpilot:voice
   // voice: { mix: { am_fenrir: 0.7, am_eric: 0.3 }, speed: 0.92, energy: 1 },
 });
 `,

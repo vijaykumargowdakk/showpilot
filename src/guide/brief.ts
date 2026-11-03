@@ -67,7 +67,7 @@ author: ${b.author}
 
 # ${b.title}
 
-A ${b.purpose} video for ${b.audience}, about ${formatLength(b.length)} long, in a ${b.tone} tone.
+${/^[aeiou]/.test(b.purpose) ? 'An' : 'A'} ${b.purpose} video for ${b.audience}, about ${formatLength(b.length)} long, in ${/^[aeiou]/.test(b.tone) ? 'an' : 'a'} ${b.tone} tone.
 ${{ ai: 'Narrated by the AI voice in showpilot.config.ts.', own: 'Narrated by me: render it silent, then I record myself reading the script (`showpilot align`).', silent: 'Silent, with subtitles.' }[b.narration]}
 ${{ assistant: 'The script is written by my AI coding assistant (see AGENTS.md or the Showpilot skill).', self: `I write the script in cuts/${b.id}.script.md.`, dictate: `I dictate the script (\`showpilot dictate ${b.id}\`).` }[b.author]}
 
