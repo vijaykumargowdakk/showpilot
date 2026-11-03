@@ -1,0 +1,32 @@
+# Troubleshooting
+
+Start with `npx showpilot doctor`: it checks Node, ffmpeg, the browser and the voice, and prints where everything is.
+
+**"Chromium is not installed yet"**: run `npx showpilot setup-browser`.
+
+**A take waits forever, then times out on `ready`**: the `app.ready` selector never appeared. Check it against the
+page, or start the app's server first when you use `app.url`.
+
+**"actions took 6.2 s, narration is 3.6 s"**: the beat's actions are slower than its line. It still works (the beat
+just lasts longer), but the video feels better if the line is a little longer or the actions are fewer.
+
+**A click lands on the wrong thing, or nothing happens**: use role and label locators, and `s.settle()` after
+anything that animates. `showpilot frames <cut> <chapter>:<beat>` shows what the screen looked like at the end of each
+beat.
+
+**"No Python 3.10–3.12 found"**: Kokoro doesn't support newer Pythons yet. Install 3.12 and run
+`npx showpilot setup-voice` again, or set `SHOWPILOT_PYTHON` to it.
+
+**The voice is slow**: without an NVIDIA or Apple GPU it runs on the CPU. That's normal; the audio is cached, so each
+line is spoken only once.
+
+**No stress or energy in the voice, and doctor mentions Rubber Band**: your ffmpeg was built without it. Install a
+full build (on Windows, the "full" builds from ffmpeg.org; on macOS, `brew install ffmpeg`).
+
+**"… is still running"**: another heavy stage holds the lock. Wait for it to finish. If it crashed, the lock clears
+itself once that process is gone.
+
+**Rendering is slow or makes the computer sluggish**: set `RENDER_CONCURRENCY` to fewer threads (the default is half).
+
+**Something else**: [open an issue](https://github.com/vijaykumargowdakk/showpilot/issues) with the command, the
+output, and `npx showpilot doctor`.

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Taskly (example app)</title>
+    <style>
+      :root { --bg: #f5f7fb; --card: #fff; --ink: #172033; --muted: #66708a; --line: #e2e6ef; --accent: #4f46e5; --done: #16a34a; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font: 18px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+      header { display: flex; align-items: center; justify-content: space-between; padding: 20px 48px; background: var(--card); border-bottom: 1px solid var(--line); }
+      header h1 { margin: 0; font-size: 26px; } header h1 span { color: var(--accent); }
+      header p { margin: 0; color: var(--muted); font-size: 15px; }
+      main { display: grid; grid-template-columns: 1fr 360px; gap: 32px; max-width: 1400px; margin: 40px auto; padding: 0 48px; }
+      .panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 28px; }
+      form { display: flex; gap: 12px; }
+      input[type="text"] { flex: 1; padding: 14px 16px; font: inherit; border: 2px solid var(--line); border-radius: 12px; }
+      input[type="text"]:focus { outline: none; border-color: var(--accent); }
+      button { font: inherit; border: 0; border-radius: 12px; padding: 12px 20px; cursor: pointer; }
+      .primary { background: var(--accent); color: #fff; font-weight: 600; }
+      .filters { display: flex; gap: 8px; margin: 24px 0 8px; }
+      .filters button { background: var(--bg); color: var(--muted); }
+      .filters button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+      ul { list-style: none; margin: 0; padding: 0; }
+      li { display: flex; align-items: center; gap: 14px; padding: 16px 4px; border-bottom: 1px solid var(--line); }
+      li.done .title { text-decoration: line-through; color: var(--muted); }
+      li input { width: 22px; height: 22px; accent-color: var(--done); }
+      .tag { margin-left: auto; font-size: 13px; padding: 4px 10px; border-radius: 999px; background: #eef2ff; color: var(--accent); }
+      .stats h2 { margin: 0 0 16px; font-size: 18px; }
+      .stat { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); }
+      .stat b { font-size: 24px; }
+      .bar { height: 12px; border-radius: 999px; background: var(--bg); overflow: hidden; margin-top: 18px; }
+      .bar div { height: 100%; background: var(--done); transition: width 0.4s; }
+      .empty { color: var(--muted); padding: 24px 4px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Task<span>ly</span></h1>
+      <p>A fictional example app for the Showpilot demo</p>
+    </header>
+    <main>
+      <section class="panel">
+        <form id="add">
+          <input id="new-task" type="text" placeholder="What needs doing?" aria-label="New task" autocomplete="off" />
+          <button class="primary" type="submit">Add task</button>
+        </form>
+        <div class="filters" role="group" aria-label="Show">
+          <button type="button" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" data-filter="open" aria-pressed="false">Open</button>
+          <button type="button" data-filter="done" aria-pressed="false">Done</button>
+        </div>
+        <ul id="tasks" aria-label="Tasks"></ul>
+      </section>
+      <aside class="panel stats" aria-label="Progress">
+        <h2>Progress</h2>
+        <div class="stat"><span>Open</span><b id="open">0</b></div>
+        <div class="stat"><span>Done</span><b id="done">0</b></div>
+        <div class="bar"><div id="bar" style="width: 0%"></div></div>
+      </aside>
+    </main>
+    <script>
+      const tasks = [
+        { title: 'Write the launch post', tag: 'marketing', done: false },
+        { title: 'Fix the login redirect', tag: 'bug', done: true },
+        { title: 'Plan the next sprint', tag: 'team', done: false },
+      ];
+      let filter = 'all';
+      const list = document.getElementById('tasks');
+      function render() {
+        const shown = tasks.filter((t) => filter === 'all' || (filter === 'done') === t.done);
+        list.innerHTML = shown.length ? '' : '<li class="empty">Nothing here.</li>';
+        for (const t of shown) {
+          const li = document.createElement('li');
+          li.className = t.done ? 'done' : '';
+          li.innerHTML = `<input type="checkbox" ${t.done ? 'checked' : ''} aria-label="Done: ${t.title}"><span class="title">${t.title}</span><span class="tag">${t.tag}</span>`;
+          li.querySelector('input').addEventListener('change', () => ((t.done = !t.done), render()));
+          list.append(li);
+        }
+        const done = tasks.filter((t) => t.done).length;
+        document.getElementById('open').textContent = tasks.length - done;
+        document.getElementById('done').textContent = done;
+        document.getElementById('bar').style.width = `${tasks.length ? (100 * done) / tasks.length : 0}%`;
+      }
+      document.getElementById('add').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('new-task');
+        if (!input.value.trim()) return;
+        tasks.unshift({ title: input.value.trim(), tag: 'new', done: false });
+        input.value = '';
+        render();
+      });
+      for (const b of document.querySelectorAll('[data-filter]'))
+        b.addEventListener('click', () => {
+          filter = b.dataset.filter;
+          for (const x of document.querySelectorAll('[data-filter]')) x.setAttribute('aria-pressed', String(x === b));
+          render();
+        });
+      render();
+    </script>
+  </body>
+</html>
