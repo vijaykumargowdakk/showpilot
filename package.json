@@ -33,6 +33,7 @@
     "bin",
     "src",
     "!src/**/*.test.ts",
+    "!**/__pycache__",
     "README.md",
     "LICENSE"
   ],
