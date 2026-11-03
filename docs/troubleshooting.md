@@ -38,7 +38,7 @@ Free some space, or set `SHOWPILOT_HOME` to a drive with room. `showpilot where`
 
 **"No narrator voice found" but I already installed one:** Showpilot keeps it in `SHOWPILOT_HOME` (`venv` inside it) and
 asks only when it isn't there. If your voice environment is somewhere else, point `SHOWPILOT_VENV` at that folder (for
-example `setx SHOWPILOT_VENV D:oice\.venv` in PowerShell, then open a new window). It is shared by every project, so
+example `setx SHOWPILOT_VENV D:\voice\.venv` in PowerShell, then open a new window). It is shared by every project, so
 it is downloaded once.
 
 **Something else**: [open an issue](https://github.com/vijaykumargowdakk/showpilot/issues) with the command, the
