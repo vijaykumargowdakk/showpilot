@@ -7,7 +7,7 @@ export default defineConfig({
     name: 'Taskly',
     highlight: 'ly',
     accent: '#818cf8',
-    links: [{ label: 'Made with', url: 'https://github.com/vijaykumargowdakk/showpilot' }],
+    links: [{ label: 'Try it', url: 'https://taskly.example' }],
   },
   // Narration is optional; this example is silent and comes with subtitles. To narrate it, pick a voice with
   // `showpilot voices`, set it here, remove `silent` from the cut, and run `showpilot voice tour` before recording.

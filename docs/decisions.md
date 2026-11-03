@@ -36,3 +36,6 @@ scenes and subtitle code.
 **Dubbing never re-renders.** Narration is laid over a finished silent render: each line starts at its subtitle;
 a line that is too long is sped up by at most 12% and the next line waits if needed, so lines never overlap.
 Lines written to be read sound flat when spoken, so beats can carry a separate `speak` text.
+
+**Videos carry no branding of Showpilot's.** No watermark, logo or credit line is ever added to a render; what is on
+screen comes only from the project's own config and cuts. Credit is a matter for the code (the MIT notice), not the videos.

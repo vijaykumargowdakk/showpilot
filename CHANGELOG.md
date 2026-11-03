@@ -17,3 +17,4 @@ First public release.
 - Dubbing narration onto a rendered silent cut without rendering again.
 - Thumbnails, contact sheets of takes, chapter titles, `--still` frames.
 - `init`, `check`, `doctor`, `where`; everything heavy kept in `SHOWPILOT_HOME`.
+- Videos have no watermark or Showpilot branding.

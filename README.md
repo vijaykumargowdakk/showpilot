@@ -108,8 +108,13 @@ A project's recordings and videos go to its own `out/` folder, which `showpilot 
 ## Licence and credits
 
 Showpilot is free and open source under the [MIT licence](LICENSE), created by
-**[Vijay Kumar Gowda K](https://github.com/vijaykumargowdakk)**. Use it for anything. If it helps you make a video,
-a mention like *"Made with Showpilot by Vijay Kumar"* in the description is very much appreciated.
+**[Vijay Kumar Gowda K](https://github.com/vijaykumargowdakk)**.
+
+**Your videos are yours.** Showpilot adds no watermark, logo or "made with" line, and you don't need to credit it in
+the videos you make, commercial or not.
+
+**Building on the code?** You're welcome to, commercially too. The MIT licence asks one thing: keep the copyright
+notice and the licence text with any copy or modified version of Showpilot's code that you share or ship.
 
 Showpilot builds on other projects with their own licences:
 
