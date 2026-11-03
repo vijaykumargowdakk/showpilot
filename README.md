@@ -61,6 +61,48 @@ npx showpilot record launch          # drive the app and record each chapter
 npx showpilot render launch          # out/launch/launch.mp4 (+ .srt, script, chapters)
 ```
 
+## Use it in your own project
+
+Showpilot isn't on npm yet, so install it straight from GitHub. Do this in the repository of the app you want to film.
+
+**1. Pick where it lives.** Either the repository root, or a folder of its own such as `video/` (how
+[ReSecArc](https://github.com/vijaykumargowdakk/ReSecArc/tree/main/video) does it). A separate folder keeps Showpilot's
+dependencies out of your app's `package.json`, build and tests, so it's the safer choice for an existing project.
+
+```sh
+mkdir video && cd video
+npm init -y
+npm install --save-dev github:vijaykumargowdakk/showpilot
+npx showpilot setup-browser
+```
+
+**2. Say how to reach your app.** Run `npx showpilot new launch`; it asks and writes `showpilot.config.ts`. You can also
+edit it:
+
+```ts
+import { defineConfig } from 'showpilot';
+
+export default defineConfig({
+  // Either a running server...                   ...or a production build that Showpilot serves itself
+  app: { url: 'http://localhost:5173', ready: '#root main' },   // app: { serve: '../dist', ready: '#root main' },
+  brand: { name: 'My App', links: [{ label: 'Try it', url: 'https://my-app.example' }] },
+});
+```
+
+`ready` is a selector that's on screen once the app has loaded. Add `app.storage` to skip a welcome tour or choose a
+theme. Start your dev server, or run your build, before recording. Use fictional demo data.
+
+**3. Make the video.** Ask your AI assistant to *"make the launch video with Showpilot"*, or write the script yourself,
+then `npx showpilot check`, `voice`, `record` and `render` as above. Run all of this from the `video/` folder.
+
+**4. Commit the right things.** Commit `showpilot.config.ts`, `cuts/` (briefs, scripts, actions), `lexicon.json`,
+`AGENTS.md` and `.claude/skills/showpilot/`. Don't commit `out/`: it holds recordings and videos, and `new` adds it to
+`.gitignore`. Upload the finished video wherever you publish it.
+
+**5. Re-make it after a change.** Rebuild the app, then `npx showpilot record launch` (add `--chapter 3` to re-shoot one
+chapter) and `render launch`. Narration is cached, so only lines you changed are spoken again. `npx showpilot listen
+launch` checks the narrator said everything as written.
+
 ## Who writes the script
 
 | | |

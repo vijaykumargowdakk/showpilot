@@ -58,6 +58,13 @@ file and point `lexicon` at it:
 Keys match whole words, longest first. `[word](/phonemes/)` gives an exact pronunciation in Kokoro's phoneme set.
 Subtitles always show the written form.
 
+**Check it by ear, without listening to everything:** after `showpilot voice`, run `showpilot listen <cut>`. It
+transcribes each line on your computer (needs `setup-voice --dictation`) and lists the words that came out differently
+from the script, for example a product name read as one odd word. Add those to the lexicon (a product called
+"Showpilot" is `"Showpilot": "show pilot"`) and run `voice` again; only the changed lines are re-spoken. Words joined or
+split differently ("codebase" / "code base") and numbers are ignored. Stressing a short word with `*…*` can blur it,
+so if `listen` flags one, try without the stress marks.
+
 ## Generating the narration
 
 ```sh
