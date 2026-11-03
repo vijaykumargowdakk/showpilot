@@ -1,25 +1,53 @@
 {
   "name": "showpilot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Scripted product demo videos: drives your real app with Playwright, films it with a Screen Studio-style auto-zoom camera, narrates with a local AI voice, and renders with Remotion.",
   "license": "MIT",
   "author": "Vijay Kumar Gowda K (https://github.com/vijaykumargowdakk)",
-  "repository": { "type": "git", "url": "git+https://github.com/vijaykumargowdakk/showpilot.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vijaykumargowdakk/showpilot.git"
+  },
   "homepage": "https://github.com/vijaykumargowdakk/showpilot#readme",
   "bugs": "https://github.com/vijaykumargowdakk/showpilot/issues",
-  "keywords": ["demo video", "product video", "screen recording", "playwright", "remotion", "kokoro", "tts", "auto zoom", "screencast", "subtitles"],
+  "keywords": [
+    "demo video",
+    "product video",
+    "screen recording",
+    "playwright",
+    "remotion",
+    "kokoro",
+    "tts",
+    "auto zoom",
+    "screencast",
+    "subtitles"
+  ],
   "type": "module",
-  "bin": { "showpilot": "bin/showpilot.mjs" },
-  "exports": { ".": "./src/index.ts" },
-  "files": ["bin", "src", "!src/**/*.test.ts", "README.md", "LICENSE"],
-  "engines": { "node": ">=20" },
+  "bin": {
+    "showpilot": "bin/showpilot.mjs"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "bin",
+    "src",
+    "!src/**/*.test.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "typecheck": "tsc",
     "lint": "eslint .",
     "filemap": "node scripts/filemap.mjs",
     "test": "vitest run",
     "check:example": "node bin/showpilot.mjs check tour --project examples/hello && node bin/showpilot.mjs check quick --project examples/hello && node bin/showpilot.mjs check showcase --project examples/showcase",
-    "ci": "npm run typecheck && npm run lint && npm test && npm run check:example"
+    "smoke": "node bin/showpilot.mjs help",
+    "ci": "npm run typecheck && npm run lint && npm test && npm run check:example && npm run smoke",
+    "prepublishOnly": "npm run ci"
   },
   "dependencies": {
     "@remotion/bundler": "^4.0.539",

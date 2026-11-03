@@ -8,9 +8,10 @@
 - [`CLAUDE.md`](CLAUDE.md) for working rules
 
 ## Start here (next session)
-0.1.0 is released; the showcase and guided videos (`showpilot new`, voice picking, four ways to get a script) are
-merged and listed under *Unreleased* in the CHANGELOG. Next is publishing to npm (#6), which unblocks the install
-steps in the README, then the roadmap issues below.
+0.1.0 is released. The showcase, guided videos (`showpilot new`, voice picking, four ways to get a script) and
+`showpilot listen` are merged and prepared as 0.2.0 (version bumped, changelog dated, publish workflow in
+`.github/workflows/publish.yml`, steps in `docs/RELEASING.md`). Next: the owner adds the `NPM_TOKEN` secret, then
+publishes 0.2.0 to npm (#6), which makes the README's `npm install` steps work; then the roadmap issues below.
 
 ## Dev loop
 ```sh

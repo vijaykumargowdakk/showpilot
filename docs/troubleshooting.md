@@ -28,5 +28,13 @@ itself once that process is gone.
 
 **Rendering is slow or makes the computer sluggish**: set `RENDER_CONCURRENCY` to fewer threads (the default is half).
 
+**An error stops the command:** Showpilot prints a one-line reason and what to do. For the full error, run the command
+again with `SHOWPILOT_DEBUG=1` and include it in a bug report.
+
+**"Warning: only 2 GB free":** recording and rendering write many files (a 90 s video can take a few GB while it works).
+Free some space, or set `SHOWPILOT_HOME` to a drive with room. `showpilot where` shows what Showpilot uses.
+
+**The first recording takes a while:** it downloads the browser (about 700 MB, once). It's kept in `SHOWPILOT_HOME`.
+
 **Something else**: [open an issue](https://github.com/vijaykumargowdakk/showpilot/issues) with the command, the
 output, and `npx showpilot doctor`.
