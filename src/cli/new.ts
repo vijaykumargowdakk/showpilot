@@ -101,7 +101,7 @@ if (narration === 'ai') {
   const bin = path.join(PKG, 'bin', 'showpilot.mjs');
   const showpilot = (...a: string[]) => spawnSync(process.execPath, [bin, ...a, '--project', PROJECT], { stdio: 'inherit', env: process.env }).status === 0;
   if (!existsSync(PYTHON) && ui) {
-    const go = await ui.confirm('The narrator voice needs a one-time download (1–3 GB). Set it up now?', false);
+    const go = await ui.confirm(`No narrator voice found in ${path.dirname(path.dirname(PYTHON))}. It is a one-time download (1–3 GB), shared by all your projects. Set it up now? (Already have one? Answer No and set SHOWPILOT_VENV to its folder.)`, false);
     ui.close();
     if (go) showpilot('setup-voice');
   }
