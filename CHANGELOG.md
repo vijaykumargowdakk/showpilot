@@ -5,6 +5,9 @@ project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- The package no longer includes compiled Python files (`__pycache__`); 0.2.0 shipped three by accident.
+- The README installs from npm, and `docs/RELEASING.md` explains trusted publishing and publishing from your own computer.
+
 ## [0.2.0] - 2026-11-04
 
 - Easier to start and use: `showpilot` alone opens a menu; `showpilot make <cut>` runs check, narrate, record and render in one go (and `--from` continues after a failure); the browser downloads itself the first time you record.
