@@ -22,6 +22,8 @@ Look for `cuts/<id>.brief.md`. If there is none, **ask the user before writing a
 - **Voice** (AI narration only): offer `npx showpilot voices`, which plays samples and writes their pick into the config
 - **What it must show,** and the one thing viewers should remember
 
+If the brief has a `source:` line, that folder holds the app's code (the videos live outside it, so read the code there).
+
 Then write it down with `npx showpilot new <id> --purpose … --audience "…" --length 90s --tone … --narration ai|own|silent --script assistant --goals "…" --yes`.
 That creates the brief, and `showpilot.config.ts` if it's missing.
 

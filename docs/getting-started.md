@@ -76,3 +76,14 @@ setx SHOWPILOT_HOME D:\showpilot
 package; your projects' `out/` folders hold only their own videos.
 
 Already have a Python environment with Kokoro and torch? Point `SHOWPILOT_VENV` at it to skip the download.
+
+## Where your videos are saved
+
+`npx showpilot` never writes into your code repository unless you ask it to. It asks where to save the videos and
+suggests a folder next to your project (for `my-app`, that is `my-app-videos`). Showpilot is installed there, not in
+your app, so your `package.json`, build and git history stay as they are. Showpilot remembers the link, so running
+`npx showpilot` in `my-app` again opens its videos; an AI assistant reads your app's code through the `source:` line
+in the brief.
+
+The narrator voice and the browser live once in `SHOWPILOT_HOME`, shared by every project: starting a video for a
+second app downloads nothing again.
