@@ -10,14 +10,14 @@ import { C, FONT, themeVars } from './theme';
 
 const BrandContext = createContext<Brand>({ name: '' });
 
-function TitleBar() {
+function TitleBar({ title }: { title?: string }) {
   const brand = useContext(BrandContext);
   return (
     <div style={{ height: WIN.titlebar, background: C.titlebar, display: 'flex', alignItems: 'center', padding: '0 16px', borderBottom: `1px solid ${C.border}` }}>
       {['#ff5f57', '#febc2e', '#28c840'].map((c) => (
         <span key={c} style={{ width: 13, height: 13, borderRadius: '50%', background: c, marginRight: 9 }} />
       ))}
-      <span style={{ flex: 1, textAlign: 'center', marginRight: 66, color: C.muted, font: `500 15px ${FONT}` }}>{brand.name}</span>
+      <span style={{ flex: 1, textAlign: 'center', marginRight: 66, color: C.muted, font: `500 15px ${FONT}` }}>{title ?? brand.windowTitle ?? brand.name}</span>
     </div>
   );
 }
@@ -50,7 +50,7 @@ function ChapterTitle({ number, title, frame }: { number: number; title: string;
 function AppWindow({ plan, frame, style }: { plan: ChapterPlan; frame: number; style?: CSSProperties }) {
   return (
     <div style={{ width: WIN.w, height: WIN.h + WIN.titlebar, overflow: 'hidden', background: '#fff', ...style }}>
-      <TitleBar />
+      <TitleBar title={plan.window} />
       <div style={{ position: 'relative', width: WIN.w, height: WIN.h }}>
         <Img src={staticFile(`${plan.dir}/${plan.files[plan.shot[Math.min(frame, plan.frames - 1)]]}`)} style={{ width: WIN.w, height: WIN.h, display: 'block' }} />
         {/* Overlays in app pixels, scaled into the window. */}

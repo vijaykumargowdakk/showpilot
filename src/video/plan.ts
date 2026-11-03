@@ -41,11 +41,13 @@ export type ChapterPlan = {
   phrases: { f: number; to: number; words: { w: string; f: number }[] }[];
   /** Each line's text and the frame it starts on, for the script and subtitle files. */
   lines: { f: number; text: string }[];
+  /** The window's title bar text for this chapter: the site's host for web chapters (else the brand's). */
+  window?: string;
   /** Number shown in the chapter title (recorded chapters of cuts with chapterTitles). */
   number?: number;
 };
 /** What the renderer needs from the config: the name and colours, the logo (copied to out/_brand) and links. */
-export type Brand = Config['brand'] & { logoFile?: string };
+export type Brand = Config['brand'] & { logoFile?: string; windowTitle?: string };
 export type RenderPlan = { cut: string; fps: number; frames: number; silent?: boolean; chapterTitles?: boolean; brand: Brand; chapters: ChapterPlan[] };
 
 const round = (v: number, d = 1) => Math.round(v * 10 ** d) / 10 ** d;
@@ -202,6 +204,7 @@ function captureChapter(cut: Cut, ci: number, voice: Voice, out: string): Chapte
   return {
     title: tl.title,
     kind: 'capture',
+    window: chapter.kind === 'web' && chapter.url ? new URL(chapter.url).host : undefined,
     speed: chapter.speed,
     dir,
     files: tl.shots.map((x) => x.file),

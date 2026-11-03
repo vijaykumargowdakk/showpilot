@@ -1,5 +1,10 @@
 # Showpilot
 
+![A Showpilot video: the camera follows typing in a to-do app, with subtitles](docs/media/showcase.gif)
+
+*A clip from Showpilot's own 65-second showcase, made with Showpilot from [`examples/showcase`](examples/showcase):
+[watch the full video](https://github.com/vijaykumargowdakk/showpilot/releases/download/v0.1.0/showpilot-showcase.mp4).*
+
 **Scripted product demo videos that look hand-made.** You write a short script; Showpilot drives your real app in a
 browser, films it with a Screen Studio-style camera that glides and zooms onto every click, narrates it with a
 natural AI voice that runs on your own computer, and renders a polished 1080p60 video, with subtitles.
@@ -54,7 +59,8 @@ npx showpilot voices                 # out/voices/index.html: listen and pick on
 npx showpilot voice tour             # speak every line (before recording, so takes are paced to the voice)
 ```
 
-Try the bundled example from this repository:
+Try the bundled examples from this repository: `examples/hello` (a silent one-minute tour with subtitles) and
+`examples/showcase` (the narrated showcase above):
 
 ```sh
 git clone https://github.com/vijaykumargowdakk/showpilot && cd showpilot && npm install
