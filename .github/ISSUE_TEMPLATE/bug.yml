@@ -1,0 +1,30 @@
+name: Bug report
+description: Something doesn't work as it should
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you ran, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Command output
+      description: The full output of the command that failed.
+      render: shell
+  - type: textarea
+    id: doctor
+    attributes:
+      label: showpilot doctor
+      description: The output of `npx showpilot doctor`.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: e.g. macOS 15 on Apple Silicon, Windows 11, Ubuntu 24.04
