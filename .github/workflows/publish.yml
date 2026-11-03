@@ -2,7 +2,8 @@ name: Publish to npm
 
 # Runs when a GitHub release is published (gh release create vX.Y.Z). It checks that the tag matches package.json,
 # runs the same checks as CI, and publishes with provenance, so the npm page links back to this exact commit.
-# Needs a repository secret NPM_TOKEN: an npm "automation" access token (npmjs.com → Access Tokens).
+# Uses npm trusted publishing: the package's settings on npmjs.com name this repository and this workflow file, so no
+# token or secret is needed (see docs/RELEASING.md). `id-token: write` below is what lets npm verify the workflow.
 
 on:
   release:
@@ -30,8 +31,9 @@ jobs:
             echo "Release tag v$tag does not match package.json version $version" >&2
             exit 1
           fi
+      # Trusted publishing (no token) needs npm 11.5.1 or newer; Node 22 ships an older npm.
+      - run: npm install -g npm@latest
       - run: npm ci
       - run: npm run ci
+      # Authenticated by the trusted-publisher link on npmjs.com (this repository and this workflow file), not a token.
       - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

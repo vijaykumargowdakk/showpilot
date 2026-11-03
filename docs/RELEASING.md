@@ -22,8 +22,13 @@ working for direct publishing in January 2027. Trusted publishing needs no token
 1. Publish the package once from your own computer (see below), so that it exists.
 2. On npmjs.com: the `showpilot` package → Settings → **Trusted Publisher** → GitHub Actions. Enter the owner
    `vijaykumargowdakk`, the repository `showpilot`, and the workflow file `publish.yml`.
-3. Delete the `NPM_TOKEN` repository secret and the old token on npmjs.com, and remove the `NODE_AUTH_TOKEN` line from
-   `.github/workflows/publish.yml`. The workflow already has `id-token: write`, which trusted publishing uses.
+3. Delete the `NPM_TOKEN` repository secret and the old token on npmjs.com. The workflow has no token line, has
+   `id-token: write`, and updates npm first (trusted publishing needs npm 11.5.1 or newer).
+
+This is set up for `showpilot` (done 2026-11-04, with the package's publishing access set to "Require two-factor
+authentication and disallow bypass 2fa tokens"). The first release published this way is the real test: if it fails,
+check that the owner, repository and workflow file name on npmjs.com match exactly, and that "direct publish" is allowed
+there, not only staging.
 
 ## Publishing from your own computer
 
