@@ -53,3 +53,5 @@ lines by default, which CLAUDE.md overrides), and a PreToolUse hook blocks what 
 commits or pushes on `main` or `claude/…`, local merges into `main`. Merging a PR asks the maintainer. The hooks are
 Node scripts so they run on every OS without Python. The session hook installs with `npm ci`, as CI does, because
 `npm install` rewrites the committed lockfile. Maintainer's input: asked for the setup to be followed in every session.
+
+**Questions in a terminal are tested in a real pseudo-terminal, and the program that asks closes stdin before starting another.** On Windows a paused (not closed) terminal input keeps a read pending that takes keystrokes meant for a child program, so after the guided start's first menu the next question accepted no typing, even though the unit tests with a simulated terminal passed. The launcher asks `isatty(0)` rather than touching `process.stdin`, and `ui.close()` destroys the real stdin. To test prompts, drive `node bin/showpilot.mjs` through ConPTY (the `pywinpty` Python package) and look at the screen; simulated key presses alone missed this.

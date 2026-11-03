@@ -36,5 +36,10 @@ Free some space, or set `SHOWPILOT_HOME` to a drive with room. `showpilot where`
 
 **The first recording takes a while:** it downloads the browser (about 700 MB, once). It's kept in `SHOWPILOT_HOME`.
 
+**"No narrator voice found" but I already installed one:** Showpilot keeps it in `SHOWPILOT_HOME` (`venv` inside it) and
+asks only when it isn't there. If your voice environment is somewhere else, point `SHOWPILOT_VENV` at that folder (for
+example `setx SHOWPILOT_VENV D:\voice\.venv` in PowerShell, then open a new window). It is shared by every project, so
+it is downloaded once.
+
 **Something else**: [open an issue](https://github.com/vijaykumargowdakk/showpilot/issues) with the command, the
 output, and `npx showpilot doctor`.
