@@ -1,6 +1,6 @@
 {
   "name": "showpilot",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Scripted product demo videos: drives your real app with Playwright, films it with a Screen Studio-style auto-zoom camera, narrates with a local AI voice, and renders with Remotion.",
   "license": "MIT",
   "author": "Vijay Kumar Gowda K (https://github.com/vijaykumargowdakk)",

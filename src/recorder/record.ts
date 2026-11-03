@@ -30,7 +30,7 @@ async function recordChapter(config: Config, appUrl: string, cut: Cut, index: nu
 
   const { width, height, scale } = CAPTURE;
   // Density is forced at launch: with Playwright's deviceScaleFactor the screencast still sends 1× frames.
-  const browser = await chromium.launch({ headless: true, args: [`--force-device-scale-factor=${scale}`, `--window-size=${width},${height}`] });
+  const browser = await chromium.launch({ headless: true, args: [`--force-device-scale-factor=${scale}`, `--window-size=${width},${height}`, "--use-angle=d3d11", "--enable-gpu", "--ignore-gpu-blocklist"] });
   const context = await browser.newContext({ viewport: null, serviceWorkers: chapter.offline ? 'allow' : 'block', colorScheme: config.app.colorScheme ?? 'light' });
   // Storage is reset once per take (not on every reload), so a chapter can show that the app keeps its work.
   await context.addInitScript(
