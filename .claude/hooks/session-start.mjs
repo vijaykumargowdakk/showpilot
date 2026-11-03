@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // SessionStart hook: installs dependencies in cloud sessions, refreshes FILEMAP.md, and hands Claude the
 // project status and the rules a session most often gets wrong. Its stdout becomes session context.
 import { execFileSync, execSync } from 'node:child_process';

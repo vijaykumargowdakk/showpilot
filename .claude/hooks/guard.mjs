@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // PreToolUse hook: enforces the git rules in CLAUDE.md for shell commands and GitHub tool calls.
 // Fails open: if the input can't be read, the call goes ahead.
 import { execFileSync } from 'node:child_process';

@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // PostToolUse hook: records each edited file in .claude/.pending-review for the end-of-turn review.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';

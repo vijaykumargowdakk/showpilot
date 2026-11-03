@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // Writes FILEMAP.md: a tree of every file git tracks or would track (ignored files never appear).
 // Paths only: sizes and times differ between checkouts and operating systems, so they would churn the file.
 import { execFileSync } from 'node:child_process';
@@ -29,12 +28,14 @@ for (const file of files) {
   node.set(parts.at(-1), null);
 }
 
+// Code-point order, not localeCompare, so every machine writes the same file whatever its locale.
+const order = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+const byName = (a, b) => order(a.toLowerCase(), b.toLowerCase()) || order(a, b);
+
 const lines = [];
 let dirs = 0;
 function walk(node, depth) {
-  const entries = [...node].sort(
-    ([a, ac], [b, bc]) => (ac ? 0 : 1) - (bc ? 0 : 1) || a.toLowerCase().localeCompare(b.toLowerCase()),
-  );
+  const entries = [...node].sort(([a, ac], [b, bc]) => (ac ? 0 : 1) - (bc ? 0 : 1) || byName(a, b));
   for (const [name, children] of entries) {
     const indent = '  '.repeat(depth);
     if (children) {
