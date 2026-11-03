@@ -69,7 +69,7 @@ the stages yourself: `check`, `voice`, `record`, `render`. Something odd? `npx s
 
 ## Use it in your own project
 
-Showpilot isn't on npm yet, so install it straight from GitHub. Do this in the repository of the app you want to film.
+Do this in the repository of the app you want to film.
 
 **1. Pick where it lives.** Either the repository root, or a folder of its own such as `video/` (how
 [ReSecArc](https://github.com/vijaykumargowdakk/ReSecArc/tree/main/video) does it). A separate folder keeps Showpilot's
@@ -78,9 +78,12 @@ dependencies out of your app's `package.json`, build and tests, so it's the safe
 ```sh
 mkdir video && cd video
 npm init -y
-npm install --save-dev github:vijaykumargowdakk/showpilot
-npx showpilot setup-browser
+npm install --save-dev showpilot
+npx showpilot new launch
 ```
+
+On Windows PowerShell, if it says scripts are disabled, use `npm.cmd` and `npx.cmd`, or run
+`Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned` once.
 
 **2. Say how to reach your app.** Run `npx showpilot new launch`; it asks and writes `showpilot.config.ts`. You can also
 edit it:
