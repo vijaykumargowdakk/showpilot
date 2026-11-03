@@ -36,7 +36,7 @@ export default cut({
         do: async (s) => s.moveTo({ x: 960, y: 540 }),
       }),
     ]),
-    scene('Thanks', 'cta', [beat({ say: 'Thanks for watching!' })], { props: { line: 'Thanks for watching' } }),
+    scene('Thanks', 'cta', [beat({ say: 'Thanks for watching!' })]),
   ],
 });
 `,
