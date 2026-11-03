@@ -4,3 +4,7 @@ __pycache__/
 *.pyc
 *.log
 .DS_Store
+coverage/
+.claude/.pending-review
+.claude/settings.local.json
+claude-project-bootstrap.md
