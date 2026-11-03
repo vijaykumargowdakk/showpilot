@@ -59,3 +59,4 @@ if (!existsSync(ignore) || !readFileSync(ignore, 'utf8').split('\n').includes('o
   console.log('  updated  .gitignore (out/)');
 }
 console.log(`\nNext:\n  npm install --save-dev showpilot\n  npx showpilot check tour\n  npx showpilot record tour\n  npx showpilot render tour`);
+console.log('\nOr let Showpilot ask what the video is for (length, tone, narrator, who writes it): npx showpilot new');
