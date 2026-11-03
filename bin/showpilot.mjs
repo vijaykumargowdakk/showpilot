@@ -7,7 +7,6 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, statfsSync } from 'node:fs';
 import path from 'node:path';
-import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 
 const [major] = process.versions.node.split('.').map(Number);
@@ -41,6 +40,7 @@ const SETUP_BROWSER = [process.execPath, [playwrightCli, 'install', 'chromium']]
 
 /** name → [what it does, how to run it, the lock it holds] */
 const COMMANDS = {
+  start: ['Guided start: sets Showpilot up for your project, or shows a menu if it already is', ts('src/cli/start.ts')],
   new: ['Start a video: asks its purpose, length, tone, narrator and who writes the script', ts('src/cli/new.ts')],
   make: ['Make a video from start to finish: check, narrate, record, render', ts('src/cli/make.ts')],
   assistant: ['Install the guide your AI coding assistant uses to write videos (Claude Code skill, AGENTS.md)', ts('src/cli/assistant.ts')],
@@ -70,9 +70,6 @@ function printHelp() {
   console.log('\nNew here? `showpilot new` asks a few questions and sets everything up. `showpilot doctor` checks your setup.');
   console.log('SHOWPILOT_HOME (default ~/.showpilot) holds the browser, the voice and every cache; delete it to uninstall.');
 }
-
-/** Runs another showpilot command and waits for it. */
-const run = (...argv) => spawnSync(process.execPath, [fileURLToPath(import.meta.url), ...argv], { stdio: 'inherit', env: process.env }).status ?? 1;
 
 // ───────── Preflight: what a command needs, checked before it starts ─────────
 const hasFfmpeg = () => spawnSync('ffmpeg', ['-version'], { stdio: 'ignore' }).status === 0;
@@ -115,37 +112,8 @@ function preflight(command) {
   }
 }
 
-// ───────── The menu, for `showpilot` with no command ─────────
-async function menu() {
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  const cutsDir = path.join(PROJECT, 'cuts');
-  const cuts = existsSync(cutsDir) ? readdirSync(cutsDir).filter((f) => /^[\w-]+\.ts$/.test(f) && !f.endsWith('.actions.ts')).map((f) => f.slice(0, -3)) : [];
-  const hasConfig = existsSync(path.join(PROJECT, 'showpilot.config.ts'));
-  console.log(`\nShowpilot: product videos from a script.  ${hasConfig ? `Project: ${PROJECT}` : 'No project here yet.'}\n`);
-  const items = [
-    ['Start a new video (a few questions)', ['new']],
-    ...(cuts.length ? [['Make a video from start to finish', null]] : []),
-    ['Pick a narrator voice', ['voices']],
-    ['Check my setup', ['doctor']],
-    ['Show all commands', ['help']],
-  ];
-  items.forEach(([label], i) => console.log(`  ${i + 1}. ${label}`));
-  const answer = (await rl.question('\nWhat would you like to do? (a number, or Enter to quit): ')).trim();
-  const item = items[Number(answer) - 1];
-  if (!item) return rl.close();
-  let argv = item[1];
-  if (!argv) {
-    cuts.forEach((c, i) => console.log(`  ${i + 1}. ${c}`));
-    const pick = cuts[Number((await rl.question('Which one? ')).trim()) - 1];
-    if (!pick) return rl.close();
-    argv = ['make', pick];
-  }
-  rl.close();
-  process.exit(run(...argv));
-}
-
-const command = args.shift();
-if (!command && process.stdin.isTTY) await menu();
+// With no command in a terminal, a guided start sets things up (or shows a menu if it already is).
+const command = args.shift() ?? (process.stdin.isTTY ? 'start' : undefined);
 if (!command || command === 'help' || command === '--help' || command === '-h' || !COMMANDS[command]) {
   const asked = command && !['help', '--help', '-h'].includes(command);
   if (asked) console.error(`Unknown command: ${command}\n`);

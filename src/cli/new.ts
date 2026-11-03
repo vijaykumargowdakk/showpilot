@@ -8,19 +8,17 @@ import path from 'node:path';
 import { installAssistantGuide } from '../guide/assistant';
 import { AUTHORS, formatLength, NARRATIONS, parseLength, PURPOSES, TONES, writeBrief, type Author, type Brief, type Narration, type Purpose, type Tone } from '../guide/brief';
 import { PKG, PROJECT, PYTHON } from '../paths.mjs';
-import { prompter } from '../guide/prompt';
+import { createUi } from '../guide/ui';
 import { scriptTemplate } from '../script/markdown';
 
 const argv = process.argv.slice(2);
 const flag = (name: string) => (argv.includes(`--${name}`) ? argv[argv.indexOf(`--${name}`) + 1] : undefined);
 const yes = argv.includes('--yes');
 const id = argv.find((a, i) => !a.startsWith('--') && !argv[i - 1]?.startsWith('--')) ?? flag('id');
-const rl = yes ? null : prompter();
+const ui = yes ? null : createUi();
 
 async function ask(question: string, fallback: string): Promise<string> {
-  if (!rl) return fallback;
-  const answer = (await rl.ask(`${question} [${fallback}]: `)).trim();
-  return answer || fallback;
+  return ui ? ui.text(question, fallback) : fallback;
 }
 
 async function choose<T extends string>(flagName: string, question: string, options: readonly T[], labels: Record<T, string>, fallback: T): Promise<T> {
@@ -29,19 +27,11 @@ async function choose<T extends string>(flagName: string, question: string, opti
     if (!options.includes(given as T)) throw new Error(`--${flagName} must be one of ${options.join(', ')}`);
     return given as T;
   }
-  if (!rl) return fallback;
-  console.log(`\n${question}`);
-  options.forEach((o, i) => console.log(`  ${i + 1}. ${labels[o]}`));
-  for (;;) {
-    const a = (await rl.ask(`Choose 1–${options.length} [${options.indexOf(fallback) + 1}]: `)).trim();
-    if (!a) return fallback;
-    const byNumber = options[Number(a) - 1];
-    const byName = options.find((o) => o === a.toLowerCase());
-    if (byNumber ?? byName) return (byNumber ?? byName)!;
-  }
+  if (!ui) return fallback;
+  return ui.select<T>(question, options.map((o) => ({ value: o, label: labels[o] })), options.indexOf(fallback));
 }
 
-console.log('A new Showpilot video. Press Enter to take the suggestion in [brackets].\n');
+console.log('A new Showpilot video. Press Enter to take the suggestion.');
 const name = id ?? (await ask('A short name for the video (its file name)', 'launch'));
 if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) throw new Error(`"${name}": use lowercase letters, digits and dashes`);
 
@@ -78,8 +68,6 @@ const tone = await choose<Tone>('tone', 'Tone', Object.keys(TONES) as Tone[], { 
 const narration = await choose<Narration>('narration', 'Who narrates it?', NARRATIONS, { ai: 'An AI voice (you pick one from samples)', own: 'Me: I record myself reading the script over the video', silent: 'Nobody: silent, with subtitles' }, length > 600 ? 'silent' : 'ai');
 const author = await choose<Author>('script', 'Who writes the script?', AUTHORS, { assistant: 'My AI coding assistant (it already knows the codebase)', self: 'Me, in a simple script file', dictate: 'Me, by talking it through (transcribed on this computer)' }, 'assistant');
 const goals = flag('goals') ?? (await ask('What must it show? (Enter to fill in later)', ''));
-rl?.close();
-
 // The product's name from the config (as written there), for the title.
 const product = /brand:\s*\{[^}]*?name:\s*(['"])(.*?)\1/s.exec(readFileSync(configFile, 'utf8'))?.[2] ?? path.basename(PROJECT);
 const brief: Brief = { id: name, title: flag('title') ?? `${product}: ${purpose}`, purpose, audience, length, tone, narration, author, goals: goals.replace(/;\s*/g, '\n- ').replace(/^(?=.)/, '- ') };
@@ -110,12 +98,20 @@ if (author === 'assistant') {
 if (narration === 'own') next.push(`Render it silent, read out/${name}/${name}-script.md aloud while it plays, then: npx showpilot align ${name} <your recording>`);
 
 if (narration === 'ai') {
-  if (!existsSync(PYTHON)) next.unshift('Set up the narrator: npx showpilot setup-voice, then pick one: npx showpilot voices --cut ' + name);
-  else if (!yes) {
-    console.log('\nNow pick the narrator from samples (a page opens; or type a number).');
-    const bin = path.join(PKG, 'bin', 'showpilot.mjs');
-    spawnSync(process.execPath, [bin, 'voices', '--cut', name], { stdio: 'inherit', env: process.env });
-  } else next.unshift(`Pick the narrator: npx showpilot voices --cut ${name}`);
+  const bin = path.join(PKG, 'bin', 'showpilot.mjs');
+  const showpilot = (...a: string[]) => spawnSync(process.execPath, [bin, ...a, '--project', PROJECT], { stdio: 'inherit', env: process.env }).status === 0;
+  if (!existsSync(PYTHON) && ui) {
+    const go = await ui.confirm('The narrator voice needs a one-time download (1–3 GB). Set it up now?', false);
+    ui.close();
+    if (go) showpilot('setup-voice');
+  }
+  if (existsSync(PYTHON) && ui) {
+    ui.close();
+    console.log('\nNow pick the narrator from samples (a page opens; or choose by number here).');
+    showpilot('voices', '--cut', name);
+  } else if (!existsSync(PYTHON)) next.unshift(`Set up the narrator: npx showpilot setup-voice, then pick one: npx showpilot voices --cut ${name}`);
+  else next.unshift(`Pick the narrator: npx showpilot voices --cut ${name}`);
 }
+ui?.close();
 
 console.log(`\nNext:\n${next.map((n) => (n.startsWith('  ') ? n : `  • ${n}`)).join('\n')}`);
