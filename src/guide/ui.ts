@@ -127,6 +127,9 @@ export function createUi(io: IO = { input: process.stdin, output: process.stdout
     close() {
       release();
       lines?.close();
+      // On Windows a paused terminal input keeps a read pending, which takes keystrokes meant for a program started
+      // afterwards (a child process that asks its own questions), so the real stdin is closed for good.
+      if (io.input === process.stdin && tty) process.stdin.destroy();
     },
   };
 }

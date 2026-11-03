@@ -7,6 +7,7 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, statfsSync } from 'node:fs';
 import path from 'node:path';
+import { isatty } from 'node:tty';
 import { fileURLToPath } from 'node:url';
 
 const [major] = process.versions.node.split('.').map(Number);
@@ -113,7 +114,9 @@ function preflight(command) {
 }
 
 // With no command in a terminal, a guided start sets things up (or shows a menu if it already is).
-const command = args.shift() ?? (process.stdin.isTTY ? 'start' : undefined);
+// (isatty(0) is asked instead of process.stdin.isTTY, which would open the terminal's input in this launcher, and an
+// open input here takes keystrokes meant for the command it starts.)
+const command = args.shift() ?? (isatty(0) ? 'start' : undefined);
 if (!command || command === 'help' || command === '--help' || command === '-h' || !COMMANDS[command]) {
   const asked = command && !['help', '--help', '-h'].includes(command);
   if (asked) console.error(`Unknown command: ${command}\n`);
