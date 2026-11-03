@@ -5,6 +5,8 @@ project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- `showpilot listen`: transcribes the narration on your computer and lists words the narrator said differently from the script, with the lexicon entries to add. "Showpilot" is now said as "show pilot".
+- README: a "Use it in your own project" section, and the showcase GIF from the 94-second video.
 - `showpilot new`: a guided start that asks the purpose, audience, length, tone, narrator and who writes the script, and writes a brief (`cuts/<id>.brief.md`). Every question also has a flag.
 - Tone presets (energetic, professional, friendly, calm, playful) set the narrator's energy and speed and the audition line.
 - `showpilot voices` lets you pick a narrator from the samples: a "Use this voice" button on a local page, or a number in the terminal. The pick is written into `showpilot.config.ts`.
