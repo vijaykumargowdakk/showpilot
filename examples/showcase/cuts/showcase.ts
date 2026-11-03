@@ -14,6 +14,16 @@ async function broll(s: Studio) {
   await s.click(task(s, 'Plan the next sprint'));
   await s.wait(0.8);
   await s.click(s.page.getByRole('button', { name: 'Done', exact: true }));
+  // The opening runs for about 25 s, so the app keeps being used for all of it.
+  for (const [filter, task] of [['All', 'Review the pull request'], ['Open', 'Book the team lunch'], ['All', 'Write the release notes']]) {
+    await s.wait(1.2);
+    await s.click(s.page.getByRole('button', { name: filter, exact: true }));
+    await s.wait(0.8);
+    await s.type(s.page.getByLabel('New task'), task);
+    await s.press('Enter');
+  }
+  await s.wait(1);
+  await s.click(task(s, 'Write the launch post'));
 }
 
 export default cut({
@@ -25,9 +35,10 @@ export default cut({
       'kinetic',
       [
         beat({ say: 'This video was not recorded by hand. || And nobody edited it.' }),
-        beat({ say: '<up>It was *written*.</up> || A short script, | and *Showpilot* did the rest.' }),
+        beat({ say: "<up>It was *written*.</up> || Not by me, though. | The AI assistant I code with wrote the script, | because it already knows the codebase." }),
+        beat({ say: 'Or write it yourself, | dictate it, | or read it in your own voice. || Then *Showpilot* does the rest.' }),
       ],
-      { broll, props: { highlight: ['written', 'script'] } },
+      { broll, props: { highlight: ['written', 'assistant', 'script', 'Showpilot'] } },
     ),
 
     chapter('It drives your real app', [
@@ -58,11 +69,11 @@ export default cut({
     scene(
       'Everything a launch needs',
       'badges',
-      [beat({ say: "There's a *narrator* that runs on your own computer. | *Subtitles* for every line. | And *thumbnails* and chapters, | from the same script." })],
+      [beat({ say: "Pick a *narrator* from samples, | in the tone you want. | *Subtitles* for every line. | And *thumbnails* and chapters, | from the same script." })],
       {
         props: {
           badges: [
-            { word: 'narrator', title: 'A natural narrator', sub: 'Kokoro voices, on your own GPU or CPU' },
+            { word: 'narrator', title: 'A narrator you pick', sub: 'From samples, in your tone, on your own computer' },
             { word: 'subtitles', title: 'Subtitles', sub: '.srt, a timed script, and chapters' },
             { word: 'thumbnails', title: 'Thumbnails', sub: 'From any moment of the recording' },
           ],
@@ -73,7 +84,7 @@ export default cut({
 
     web('The script', `${REPO}/blob/main/examples/hello/cuts/tour.ts`, [
       beat({
-        say: "Here's a whole video's script: | a few dozen lines of TypeScript.",
+        say: "Here's a whole video's script. | Your assistant writes it, | and you change whatever you like.",
         camera: 'wide',
         do: async (s) => {
           await s.moveTo({ x: 1100, y: 600 });

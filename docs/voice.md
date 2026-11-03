@@ -3,19 +3,26 @@
 ## Picking a narrator
 
 ```sh
-npx showpilot voices                                  # every voice at two speeds
-npx showpilot voices --voices male --speeds 0.92      # or female, or ids: am_fenrir,bf_emma
-npx showpilot voices --line "Hi! | This is *my* product."
+npx showpilot voices --cut launch                     # every voice, reading a line in the brief's tone
+npx showpilot voices --tone calm --voices female      # or male, or ids: am_fenrir,bf_emma
+npx showpilot voices --line "Hi! | This is *my* product." --speeds 0.92
 ```
 
-Open `out/voices/index.html`, listen, and put the one you like in the config:
+It renders a sample of each narrator, then gives you two ways to choose, at the same time:
+
+- **A page in your browser** with every sample and a **Use this voice** button under each.
+- **A numbered list in the terminal:** type the number (or `q` to decide later).
+
+The choice goes straight into `showpilot.config.ts`, on the line under `// showpilot:voice`, replacing an existing
+`voice:` entry, or added at the top of `defineConfig({`. The energy comes from the tone. If the config can't be
+edited safely, the line to paste is printed instead. `--no-pick` only renders the samples (`out/voices/index.html`).
 
 ```ts
 voice: { mix: { am_fenrir: 0.7, am_eric: 0.3 }, speed: 0.92, energy: 1 },
 ```
 
 A `mix` blends voices by weight. `energy` (0–1) livens the read: a slightly quicker pace, a small pitch lift with
-formants kept, shorter breaths and stronger stress.
+formants kept, shorter breaths and stronger stress. The [tones](new-video.md#tones) set it for you.
 
 ## Writing lines to be spoken
 
@@ -83,3 +90,33 @@ kept), and if it still runs over, the next line waits, so lines never overlap. T
 
 Lines written to be read often sound flat when spoken. Give the beats a `speak` text written for the ear; the
 subtitles of the voiced copy follow what is actually said.
+
+## Your own voice
+
+Prefer to narrate it yourself? Make the cut silent, then read it over the finished video:
+
+```sh
+npx showpilot render tour                         # silent: out/tour/tour.mp4 and out/tour/tour-script.md
+# Play the video and read the script along with it, in one take, with any recorder or phone.
+npx showpilot align tour my-take.m4a              # out/tour/tour-voiced.mp4 and tour-voiced.srt
+```
+
+`align` finds each line in your take, cleans it up (rumble cut, gentle compression, −16 LUFS, like the AI voice),
+and places it where its subtitle appears, without rendering again. It's fine to start each line a little late or to
+pause in the middle of one. Lines are found from a transcript when dictation is installed (`--no-transcribe` skips
+it), and from the pauses otherwise. A line it can't find is left silent and reported.
+
+## Dictating the script
+
+Talk the video through instead of typing it. It's transcribed on your computer; nothing is sent anywhere.
+
+```sh
+npx showpilot setup-voice --dictation             # once: adds faster-whisper to the voice environment
+npx showpilot dictate launch --record             # record from the microphone, press Enter to stop
+npx showpilot dictate launch talk-through.m4a     # or transcribe any recording
+```
+
+You get `cuts/launch.script.md`: one narration line per sentence. Say **"next chapter"**, or pause for a few
+seconds, to start a new chapter. Then rename the chapters, add `> do:` notes for what happens on screen, and run
+`npx showpilot script launch` (see [writing cuts](writing-cuts.md#writing-the-script-yourself)). If a script already
+exists, the dictation goes to `cuts/launch.dictated.script.md` unless you pass `--force`.

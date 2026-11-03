@@ -2,23 +2,25 @@
 
 ![A Showpilot video: the camera follows typing in a to-do app, with subtitles](docs/media/showcase.gif)
 
-*A clip from Showpilot's own 65-second showcase, made with Showpilot from [`examples/showcase`](examples/showcase):
+*A clip from Showpilot's own 77-second showcase, made with Showpilot from [`examples/showcase`](examples/showcase):
 [watch the full video](https://github.com/vijaykumargowdakk/showpilot/releases/download/v0.1.0/showpilot-showcase.mp4).*
 
-**Scripted product demo videos that look hand-made.** You write a short script; Showpilot drives your real app in a
-browser, films it with a Screen Studio-style camera that glides and zooms onto every click, narrates it with a
-natural AI voice that runs on your own computer, and renders a polished 1080p60 video, with subtitles.
+**Scripted product demo videos that look hand-made.** Tell Showpilot what the video is for, how long and in what
+tone; the AI assistant you already code with writes the script, because it knows your codebase. Showpilot then
+drives your real app in a browser, films it with a Screen Studio-style camera that glides and zooms onto every
+click, narrates it with a voice you pick from samples (or your own), and renders a polished 1080p60 video, with
+subtitles.
 
-Change the UI, run it again, and the whole video is re-shot in one command. No screen recorder, no timeline editing,
-no microphone.
+Change the UI, run it again, and the whole video is re-shot in one command. No screen recorder, no timeline editing.
 
 - **Real app, real clicks.** Playwright drives the page like a person: eased mouse paths, human typing speed, pauses.
 - **A camera that directs itself.** Auto-zoom onto clicks and typing, smooth springs, a glide cursor with click
   ripples, keycaps for shortcuts, callouts, and a macOS-style window on an animated background.
-- **A narrator you choose.** [Kokoro](https://huggingface.co/hexgrad/Kokoro-82M) voices, blended and tuned, with
-  light markup for pauses, stress and energy. It runs locally: an NVIDIA GPU, Apple Silicon or just the CPU.
-- **Or no voice at all.** Silent cuts are paced for reading and come with an `.srt` subtitle file for closed
-  captions (VLC, YouTube), plus a timestamped script you can read your own voiceover from.
+- **A narrator you pick by ear.** [Kokoro](https://huggingface.co/hexgrad/Kokoro-82M) voices: hear the samples,
+  click "Use this voice", and the tone you chose sets its energy. It runs locally: an NVIDIA GPU, Apple Silicon or
+  the CPU.
+- **Or your own voice, or none.** Read the script over the finished video and Showpilot lines your take up, line by
+  line. Or go silent: paced for reading, with an `.srt` subtitle file for closed captions (VLC, YouTube).
 - **Scenes between the takes.** Kinetic text, badges that pop in as they are named, a closing card, and live app
   footage behind them.
 - **Everything else a launch needs.** Chapter titles, a YouTube chapter list, thumbnails, and dubbing narration onto a
@@ -45,22 +47,34 @@ Requirements: **Node 20+**, **ffmpeg** on your PATH, and for narration **Python 
 ```sh
 npm install --save-dev showpilot
 npx showpilot setup-browser          # the Chromium Playwright drives
-npx showpilot init                   # showpilot.config.ts and cuts/tour.ts
-npx showpilot check tour             # list chapters and lines, no browser
-npx showpilot record tour            # drive the app and record each chapter
-npx showpilot render tour            # out/tour/tour.mp4 (+ .srt, script, chapters)
+npx showpilot setup-voice            # optional: the narrator (Python environment + Kokoro, about 1–3 GB with torch)
+npx showpilot new launch             # asks: purpose, audience, length, tone, who narrates, who writes the script
 ```
 
-For a narrator:
+Then ask your AI assistant to *"make the launch video with Showpilot"* (it follows the guide `new` installs), or
+write it yourself. Either way, the video is made with:
 
 ```sh
-npx showpilot setup-voice            # Python environment + Kokoro (about 1–3 GB with torch)
-npx showpilot voices                 # out/voices/index.html: listen and pick one
-npx showpilot voice tour             # speak every line (before recording, so takes are paced to the voice)
+npx showpilot check launch           # chapters, lines, and the length against your target
+npx showpilot voice launch           # AI narration, before recording, so takes are paced to it
+npx showpilot record launch          # drive the app and record each chapter
+npx showpilot render launch          # out/launch/launch.mp4 (+ .srt, script, chapters)
 ```
 
-Try the bundled examples from this repository: `examples/hello` (a silent one-minute tour with subtitles) and
-`examples/showcase` (the narrated showcase above):
+## Who writes the script
+
+| | |
+|---|---|
+| **Your AI assistant** (the default) | Claude Code, Cursor, Copilot, Codex… It reads your code and tests, asks what it needs, writes the cut, records, checks the frames and renders. `showpilot assistant` installs its guide. [More](docs/assistants.md) |
+| **You, in plain words** | A Markdown script: chapters, one paragraph per line, `> do:` notes for what happens on screen. `showpilot script` turns it into a cut. [More](docs/writing-cuts.md#writing-the-script-yourself) |
+| **You, out loud** | `showpilot dictate --record`: talk it through, and it's transcribed on your computer into that script. [More](docs/voice.md#dictating-the-script) |
+| **You, in TypeScript** | Write `cuts/<id>.ts` directly. [More](docs/writing-cuts.md) |
+
+And the voice: an AI narrator you [pick from samples](docs/voice.md#picking-a-narrator), [your own](docs/voice.md#your-own-voice)
+(read the script over the silent video; `showpilot align` places each line), or none, with subtitles.
+
+Try the bundled examples from this repository: `examples/hello` (a silent tour with subtitles, and `quick`, a script
+written in Markdown) and `examples/showcase` (the narrated showcase above):
 
 ```sh
 git clone https://github.com/vijaykumargowdakk/showpilot && cd showpilot && npm install
@@ -100,9 +114,12 @@ long as its line takes. `|` is a breath, `||` a beat, `*word*` stresses a word, 
 ## Documentation
 
 - [Getting started](docs/getting-started.md): install on Windows, macOS or Linux, where files go, uninstalling
+- [Starting a video](docs/new-video.md): `showpilot new`, the brief, lengths and tones
+- [Let your AI assistant write it](docs/assistants.md): the Claude Code skill and the AGENTS.md guide
 - [Writing cuts](docs/writing-cuts.md): chapters, beats, the Studio actions, camera, scenes, b-roll, thumbnails
 - [Configuration](docs/configuration.md): `showpilot.config.ts`, brand, app, voice
-- [Voice and subtitles](docs/voice.md): picking a narrator, delivery marks, pronunciations, silent cuts, dubbing
+- [Voice and subtitles](docs/voice.md): picking a narrator, delivery marks, pronunciations, silent cuts, dubbing,
+  your own voice, dictation
 - [Troubleshooting](docs/troubleshooting.md)
 
 ## Where files go

@@ -1,6 +1,6 @@
 // Generated from cuts/quick.script.md by `showpilot script quick`: edit the script and run it again.
 // The on-screen actions are in cuts/quick.actions.ts, which is yours and is never overwritten.
-import { beat, chapter, cut, scene, web } from 'showpilot';
+import { beat, chapter, cut, scene } from 'showpilot';
 import { actions } from './quick.actions';
 
 export default cut({

@@ -79,10 +79,12 @@ export function cutSource(id: string, s: Script, opts: { silent: boolean; chapte
       c.scene === 'badges' ? `, {\n      // Add one badge per item, appearing when its word is said, e.g. { word: 'fast', title: 'Fast', sub: '…' }.\n      props: { badges: [] },\n    }` : '';
     return `    scene(${q(c.title)}, ${q(c.scene!)}, [\n${beats}\n    ]${props}),`;
   });
+  const helpers = ['beat', 'chapter', 'cut', 'scene', 'web'].filter((h) => ['beat', 'cut'].includes(h) || s.chapters.some((c) => ({ chapter: 'app', scene: 'scene', web: 'web' })[h] === c.kind));
+  const usesActions = s.chapters.some((c) => c.kind !== 'scene' && c.lines.some((l) => l.notes.length));
   return `// Generated from cuts/${id}.script.md by \`showpilot script ${id}\`: edit the script and run it again.
 // The on-screen actions are in cuts/${id}.actions.ts, which is yours and is never overwritten.
-import { beat, chapter, cut, scene, web } from 'showpilot';
-import { actions } from './${id}.actions';
+import { ${helpers.join(', ')} } from 'showpilot';
+${usesActions ? `import { actions } from './${id}.actions';\n` : ''}`.trimEnd() + `
 
 export default cut({
   id: ${q(id)},
