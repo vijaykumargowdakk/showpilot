@@ -42,4 +42,5 @@ node bin/showpilot.mjs record tour --project examples/hello   # then: render tou
 - Review PR #8, and say when to merge it.
 - Publish to npm (#6): needs the npm account and package name.
 - macOS testing (#4) needs an Apple Silicon machine.
-- Review and approve merging the project-setup PR (CLAUDE.md, this file, FILEMAP, hooks).
+- Review and approve merging the project-setup PR #10 (CLAUDE.md, this file, FILEMAP, hooks). Sessions start from
+  `main`, so the hooks and rules apply to new sessions only once it is merged.

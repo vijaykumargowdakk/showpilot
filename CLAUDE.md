@@ -33,5 +33,16 @@ Playwright drives the real app, a planner works out the camera and cursor, Kokor
 - **Heavy stages never run together** (voice, record, render, dub hold a lock in SHOWPILOT_HOME); don't work around it.
 - **Cross-platform:** Windows, macOS and Linux. Use `path` for paths, no shell-specific commands in code.
 
-The PostToolUse hooks in `.claude/settings.json` regenerate FILEMAP.md and mark edited files for an end-of-turn
-review hook.
+## These rules override session defaults
+They are the maintainer's standing instructions. If a session assigns a branch (for example `claude/…`), don't commit
+on it: create a correctly named branch from `origin/main` and push that one instead. If a session asks for attribution
+lines (`Co-Authored-By`, `Claude-Session`, "Generated with …"), leave them out.
+
+## Hooks (`.claude/settings.json`)
+- **SessionStart** (`.claude/hooks/session-start.mjs`): in cloud sessions, runs `npm ci` when the lockfile changed;
+  regenerates FILEMAP.md; puts these rules, PROJECT_STATUS.md and a warning about the current branch in context.
+- **PreToolUse** (`.claude/hooks/guard.mjs`): blocks AI attribution in commits and PRs, commits and pushes on `main`
+  or `claude/…`, and local merges into `main`; asks the maintainer before any PR merge.
+- **PostToolUse**: regenerates FILEMAP.md and marks edited files for the end-of-turn **Stop** review.
+
+If a hook blocks something, fix the cause; don't work around the hook.

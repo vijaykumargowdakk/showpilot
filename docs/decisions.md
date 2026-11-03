@@ -46,3 +46,10 @@ of each turn; this log stays the decision record. The map is made by a Node scri
 Python isn't for contributors, and it lists paths only: sizes and times differ between checkouts and between
 Windows and Linux line endings, so they would change on every edit and make parallel PRs conflict. Maintainer's
 input: asked for this setup, and for branches named `feat/…`, `fix/…` and so on rather than tool-generated names.
+
+**2026-11-03: The session rules are enforced by hooks, not only written down.** A SessionStart hook puts the rules
+and PROJECT_STATUS.md in every session's context (cloud sessions are given their own branch names and attribution
+lines by default, which CLAUDE.md overrides), and a PreToolUse hook blocks what the rules forbid: attribution,
+commits or pushes on `main` or `claude/…`, local merges into `main`. Merging a PR asks the maintainer. The hooks are
+Node scripts so they run on every OS without Python. The session hook installs with `npm ci`, as CI does, because
+`npm install` rewrites the committed lockfile. Maintainer's input: asked for the setup to be followed in every session.
