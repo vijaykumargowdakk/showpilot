@@ -8,13 +8,13 @@
 - [`CLAUDE.md`](CLAUDE.md) for working rules
 
 ## Start here (next session)
-0.1.0 is released and the showcase video is merged. [PR #8](https://github.com/vijaykumargowdakk/showpilot/pull/8)
-(guided videos: `showpilot new`, voice picking, four ways to get a script) is open and waiting for review. After it,
-the roadmap issues below are next; publishing to npm (#6) unblocks the install steps in the README.
+0.1.0 is released; the showcase and guided videos (`showpilot new`, voice picking, four ways to get a script) are
+merged and listed under *Unreleased* in the CHANGELOG. Next is publishing to npm (#6), which unblocks the install
+steps in the README, then the roadmap issues below.
 
 ## Dev loop
 ```sh
-npm install
+npm ci                  # not npm install, which rewrites the committed lockfile
 node bin/showpilot.mjs setup-browser
 npm run ci              # typecheck, lint, unit tests, check of the examples
 npm run typecheck       # tsc
@@ -29,7 +29,7 @@ node bin/showpilot.mjs record tour --project examples/hello   # then: render tou
 |---|-----------|-----------|-----------|
 | M1 | 0.1.0 release | Recorder, planner, narration, dubbing, subtitles, CLI | Done (PR #1) |
 | M2 | Showcase | `examples/showcase`, README GIF, window titles | Done (PR #7) |
-| M3 | Guided videos | `showpilot new`, voice picking, ways to get a script | PR #8 merged |
+| M3 | Guided videos | `showpilot new`, voice picking, ways to get a script | Done (PR #8) |
 | M4 | npm package | Publish `showpilot` (#6) | `npm install --save-dev showpilot` works |
 | M5 | Roadmap | Video sizes (#2), background music (#3), macOS testing (#4), `studio` live preview (#5) | Each issue closed |
 
@@ -37,10 +37,12 @@ node bin/showpilot.mjs record tour --project examples/hello   # then: render tou
 - The package isn't on npm yet (#6), so the README's `npm install` / `npx showpilot` steps don't work until it is.
   From a clone, use `node bin/showpilot.mjs` instead.
 - Recording, rendering and the voice haven't been tested on macOS (Apple Silicon) (#4).
+- `showpilot dictate --record` hasn't been tested with live speech; only recorded files and microphone detection
+  have.
+- The guard hook judges a compound shell command by the branch it starts on, so `git switch <branch> && git merge …`
+  run from `main` is blocked; run the switch on its own first.
 
 ## Action items for the owner
-- Review PR #8, and say when to merge it.
 - Publish to npm (#6): needs the npm account and package name.
 - macOS testing (#4) needs an Apple Silicon machine.
-- Review and approve merging the project-setup PR #10 (CLAUDE.md, this file, FILEMAP, hooks). Sessions start from
-  `main`, so the hooks and rules apply to new sessions only once it is merged.
+- Try `showpilot dictate --record` with your microphone.
