@@ -46,20 +46,26 @@ Requirements: **Node 20+**, **ffmpeg** on your PATH, and for narration **Python 
 
 ```sh
 npm install --save-dev showpilot
-npx showpilot setup-browser          # the Chromium Playwright drives
-npx showpilot setup-voice            # optional: the narrator (Python environment + Kokoro, about 1–3 GB with torch)
-npx showpilot new launch             # asks: purpose, audience, length, tone, who narrates, who writes the script
+npx showpilot                        # a menu: start a video, make one, pick a narrator, check your setup
 ```
 
-Then ask your AI assistant to *"make the launch video with Showpilot"* (it follows the guide `new` installs), or
-write it yourself. Either way, the video is made with:
+Or by command:
 
 ```sh
-npx showpilot check launch           # chapters, lines, and the length against your target
-npx showpilot voice launch           # AI narration, before recording, so takes are paced to it
-npx showpilot record launch          # drive the app and record each chapter
-npx showpilot render launch          # out/launch/launch.mp4 (+ .srt, script, chapters)
+npx showpilot new launch             # asks: purpose, audience, length, tone, who narrates, who writes the script
+npx showpilot setup-voice            # optional: the narrator (Python environment + Kokoro, about 1–3 GB with torch)
 ```
+
+The browser it films with downloads by itself the first time you record (about 700 MB, once). Then ask your AI
+assistant to *"make the launch video with Showpilot"* (it follows the guide `new` installs), or write it yourself.
+Either way, one command makes the video:
+
+```sh
+npx showpilot make launch            # check → narrate → record → render: out/launch/launch.mp4 (+ .srt, script, chapters)
+```
+
+If a stage fails you get a plain-English message, and `showpilot make launch --from record` continues from there. To run
+the stages yourself: `check`, `voice`, `record`, `render`. Something odd? `npx showpilot doctor` checks your setup.
 
 ## Use it in your own project
 
