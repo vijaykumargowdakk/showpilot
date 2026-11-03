@@ -1,9 +1,17 @@
-// Showpilot's own showcase (about 75 s, narrated): what it does, shown by doing it, on the example app.
+// Showpilot's own showcase (about 90 s, narrated): what it does, shown by doing it, on the example app.
 // npx showpilot voice showcase && npx showpilot record showcase && npx showpilot render showcase
-import { beat, chapter, cut, scene, web, type Studio } from 'showpilot';
+import type { Locator } from 'playwright';
+import { beat, chapter, cut, scene, web, type Box, type Studio } from 'showpilot';
 import { REPO } from '../showpilot.config';
 
 const task = (s: Studio, title: string) => s.page.getByRole('checkbox', { name: `Done: ${title}` });
+
+/** The part of an element that is on screen, so a tall diagram is framed where it can be seen. */
+async function onScreen(target: Locator): Promise<Box> {
+  const b = (await target.boundingBox())!;
+  const y = Math.max(60, b.y);
+  return { x: b.x, y, width: b.width, height: Math.min(1060, b.y + b.height) - y };
+}
 
 /** Behind the opening words: the app being used, in a tilted window. */
 async function broll(s: Studio) {
@@ -35,7 +43,7 @@ export default cut({
       'kinetic',
       [
         beat({ say: 'This video was not recorded by hand. || And nobody edited it.' }),
-        beat({ say: "<up>It was *written*.</up> || Not by me, though. | The AI assistant I code with wrote the script, | because it already knows the codebase." }),
+        beat({ say: "<up>It was written down,</up> | as a script. || Not by me, though. | The AI assistant I code with wrote it, | because it already knows the codebase." }),
         beat({ say: 'Or write it yourself, | dictate it, | or read it in your own voice. || Then *Showpilot* does the rest.' }),
       ],
       { broll, props: { highlight: ['written', 'assistant', 'script', 'Showpilot'] } },
@@ -92,9 +100,33 @@ export default cut({
         },
       }),
       beat({
-        say: 'Change your app, | run it again, | and the video is *re-shot*. || In one command.',
+        say: 'Change your app, | run it again, | and the whole video is recorded again. || In one command.',
         camera: 'wide',
         do: async (s) => s.scroll(600, 3),
+      }),
+    ]),
+
+    // A codebase walkthrough, the kind of chapter a deep dive is made of: Showpilot explaining its own repository.
+    web('Your code, explained', `${REPO}/blob/main/README.md`, [
+      beat({
+        say: 'It can walk people through your codebase, too. | Here, the architecture, | straight from the README.',
+        do: async (s) => {
+          s.wide();
+          await s.scrollTo(s.page.locator('[id="user-content-how-it-works"]'), 1.6, 90);
+          await s.wait(1.2);
+          await s.focus(await onScreen(s.page.locator('[id="user-content-how-it-works"]').locator('xpath=following::section[@data-type="mermaid"][1]')), 1.5);
+        },
+      }),
+      beat({
+        say: 'Then the folders, | and the code itself, | one file at a time. || Perfect for onboarding, | or a deep dive.',
+        camera: 'wide',
+        do: async (s) => {
+          await s.goto(`${REPO}/tree/main/src`);
+          await s.wait(0.6);
+          await s.goto(`${REPO}/blob/main/src/video/camera.ts`);
+          await s.moveTo({ x: 1100, y: 650 });
+          await s.scroll(500, 2);
+        },
       }),
     ]),
 

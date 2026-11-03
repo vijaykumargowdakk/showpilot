@@ -38,6 +38,7 @@ const COMMANDS = {
   'setup-voice': ['Create the Python environment and download Kokoro (into SHOWPILOT_HOME)', js('src/voice/setup.mjs')],
   voices: ['Hear the narrators and pick one (a page with buttons, or a number here)', ts('src/cli/voices.ts'), 'voice'],
   check: ['Load the config and a cut, and list its chapters and lines (no browser)', ts('src/cli/check.ts')],
+  listen: ['Listen back to the narration and list words the narrator says wrongly', ts('src/cli/listen.ts'), 'voice'],
   voice: ['Speak every line of a cut with the configured voice', ts('src/cli/voice.ts'), 'voice'],
   record: ['Drive the app and record each chapter (--chapter N, --from N)', ts('src/recorder/record.ts'), 'record'],
   render: ['Render the video (--clean: no captions or audio; --still 300,900: frames as PNGs)', ts('src/cli/render.ts'), 'render'],
