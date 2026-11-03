@@ -8,10 +8,12 @@
 - [`CLAUDE.md`](CLAUDE.md) for working rules
 
 ## Start here (next session)
-0.1.0 is released. The showcase, guided videos (`showpilot new`, voice picking, four ways to get a script) and
-`showpilot listen` are merged and prepared as 0.2.0 (version bumped, changelog dated, publish workflow in
-`.github/workflows/publish.yml`, steps in `docs/RELEASING.md`). Next: the owner adds the `NPM_TOKEN` secret, then
-publishes 0.2.0 to npm (#6), which makes the README's `npm install` steps work; then the roadmap issues below.
+0.2.0 is released and on npm (`npm install --save-dev showpilot`): the showcase, guided videos (`showpilot new`,
+voice picking, four ways to get a script), `showpilot listen`, `showpilot make` and the menu. The first publish was
+done by the owner from their own computer (with an authenticator code), because publishing from CI with a token needs a
+one-time code. npm **Trusted Publisher** is now set up (this repository, workflow `publish.yml`) and the token is
+deleted, so later releases publish from CI without a token. It is untested until the next release (0.2.1 or later);
+if that run fails, see `docs/RELEASING.md`. Then the roadmap issues below.
 
 ## Dev loop
 ```sh
@@ -31,12 +33,12 @@ node bin/showpilot.mjs record tour --project examples/hello   # then: render tou
 | M1 | 0.1.0 release | Recorder, planner, narration, dubbing, subtitles, CLI | Done (PR #1) |
 | M2 | Showcase | `examples/showcase`, README GIF, window titles | Done (PR #7) |
 | M3 | Guided videos | `showpilot new`, voice picking, ways to get a script | Done (PR #8) |
-| M4 | npm package | Publish `showpilot` (#6) | `npm install --save-dev showpilot` works |
+| M4 | npm package | Publish `showpilot` (#6) | Done: 0.2.0 on npm; trusted publishing set up, untested until the next release |
 | M5 | Roadmap | Video sizes (#2), background music (#3), macOS testing (#4), `studio` live preview (#5) | Each issue closed |
 
 ## Known issues
-- The package isn't on npm yet (#6), so the README's `npm install` / `npx showpilot` steps don't work until it is.
-  From a clone, use `node bin/showpilot.mjs` instead.
+- Publishing from CI with a token failed with EOTP (npm wants a one-time code); CI now uses trusted publishing instead (see above).
+- 0.2.0 shipped three compiled `__pycache__` files by accident; fixed in the next release.
 - Recording, rendering and the voice haven't been tested on macOS (Apple Silicon) (#4).
 - `showpilot dictate --record` hasn't been tested with live speech; only recorded files and microphone detection
   have.
