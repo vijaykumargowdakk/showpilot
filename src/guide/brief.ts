@@ -36,6 +36,8 @@ export type Brief = {
   author: Author;
   /** Free text: what the video should show and the one thing viewers should remember. */
   goals: string;
+  /** Where the app's code is, when the videos live outside it (a path relative to the videos folder, or absolute). */
+  source?: string;
 };
 
 /** "90", "90s", "2m", "2:30", "2.5 min" → seconds. */
@@ -62,7 +64,7 @@ audience: ${b.audience}
 length: ${b.length}
 tone: ${b.tone}
 narration: ${b.narration}
-author: ${b.author}
+author: ${b.author}${b.source ? `\nsource: ${b.source}` : ''}
 ---
 
 # ${b.title}
@@ -101,5 +103,6 @@ export function readBrief(text: string): Brief {
     narration: pick(fields.narration ?? 'ai', NARRATIONS, 'narration'),
     author: pick(fields.author ?? 'assistant', AUTHORS, 'author'),
     goals,
+    ...(fields.source ? { source: fields.source } : {}),
   };
 }

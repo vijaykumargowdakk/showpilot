@@ -1,13 +1,16 @@
 // `showpilot` with no command, in a terminal: a guided start that does the setup for you.
 //  - In a project that already has Showpilot set up (here or in ./video): a menu (make a video, new video, …).
-//  - Anywhere else: asks where to put things and how to reach your app (suggesting a web address or build folder from
-//    your package.json), creates the folder, installs Showpilot there, and carries on into `showpilot new`.
+//  - Anywhere else: asks where to save the videos (by default in a folder next to your project, so your code repository
+//    is never touched) and how to reach your app (suggesting a web address or build folder from your package.json),
+//    creates the folder, installs Showpilot there, remembers the link, and carries on into `showpilot new`.
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { detectApp, slug, type PackageJson } from '../guide/detect';
 import { createUi } from '../guide/ui';
-import { PKG, PROJECT } from '../paths.mjs';
+import { findLinked, link } from '../guide/registry';
+import { HOME, PKG, PROJECT } from '../paths.mjs';
 
 const bin = path.join(PKG, 'bin', 'showpilot.mjs');
 const version = (JSON.parse(readFileSync(path.join(PKG, 'package.json'), 'utf8')) as { version: string }).version;
@@ -17,7 +20,8 @@ const showpilot = (project: string, ...argv: string[]) => spawnSync(process.exec
 const isProject = (dir: string) => existsSync(path.join(dir, 'showpilot.config.ts'));
 const readJson = (file: string): PackageJson | null => (existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')) as PackageJson) : null);
 
-const existing = [PROJECT, path.join(PROJECT, 'video')].find(isProject);
+const registry = path.join(HOME, 'projects.json');
+const existing = [PROJECT, path.join(PROJECT, 'video'), findLinked(registry, PROJECT)].find((d) => d && isProject(d));
 if (existing) await menu(existing);
 else await setup();
 
@@ -46,11 +50,20 @@ async function setup() {
   const guess = detectApp(pkg, path.basename(PROJECT), (f) => existsSync(path.join(PROJECT, f)));
   console.log(`\nWelcome to Showpilot: product demo videos from a script.\nLet's set it up${pkg ? ` for ${guess.name}` : ''}. It takes a minute, and I do the typing.`);
 
-  const where = await ui.select('Where should the video setup live?', [
-    { value: 'video', label: 'In a new "video" folder', hint: 'recommended: your app stays untouched' },
-    { value: 'here', label: 'Right here, in this folder' },
+  // The videos go outside the code repository by default: your repo gets no new files, no new dependencies.
+  const sibling = path.join(path.dirname(PROJECT), `${path.basename(PROJECT)}-videos`);
+  const where = await ui.select('Where should your videos be saved?', [
+    { value: 'beside', label: `Next to your project: ${sibling}`, hint: 'recommended: your code stays untouched' },
+    { value: 'custom', label: 'Somewhere else (you type the folder)' },
+    { value: 'inside', label: 'Inside your project, in a "video" folder', hint: 'your repo gets a new folder' },
   ]);
-  const dir = where === 'video' ? path.join(PROJECT, 'video') : PROJECT;
+  let dir = sibling;
+  if (where === 'inside') dir = path.join(PROJECT, 'video');
+  if (where === 'custom') {
+    const typed = await ui.text('Folder for your videos (created if it does not exist)', sibling);
+    dir = path.resolve(PROJECT, typed.replace(/^~(?=$|[\\/])/, os.homedir()));
+  }
+  if (dir === PROJECT) throw new Error('Pick a different folder: Showpilot keeps its own files apart from your code.');
 
   const name = await ui.text('What is your product called?', guess.name);
   const how = await ui.select('How will Showpilot reach your app?', [
@@ -64,10 +77,12 @@ async function setup() {
   ui.close();
 
   mkdirSync(dir, { recursive: true });
+  link(registry, PROJECT, dir);
+  console.log(`  saving to ${dir}`);
   const packageFile = path.join(dir, 'package.json');
   if (!existsSync(packageFile)) {
     writeFileSync(packageFile, JSON.stringify({ name: `${slug(name)}-videos`, private: true, type: 'module', description: `Showpilot videos for ${name}` }, null, 2) + '\n');
-    console.log(`  created  ${path.relative(PROJECT, packageFile) || 'package.json'}`);
+    console.log(`  created  ${packageFile}`);
   }
   if (!existsSync(path.join(dir, 'node_modules', 'showpilot'))) {
     // The cuts import from 'showpilot', so it has to be installed next to them.
@@ -78,8 +93,8 @@ async function setup() {
   }
 
   console.log("\nGreat. Now the video itself.");
-  const ok = showpilot(dir, 'new', '--app', app, '--name', name);
+  const ok = showpilot(dir, 'new', '--app', app, '--name', name, '--source', path.relative(dir, PROJECT).replace(/\\/g, '/'));
   if (how === 'url' && ok) console.log(`\nBefore you record: start your app${guess.devCommand ? ` (${guess.devCommand})` : ''} so it answers at ${app}.`);
-  if (ok) console.log(`\nTo come back to this later, run \`npx showpilot\`${dir === PROJECT ? '' : ' in this folder, or in the video folder'}.`);
+  if (ok) console.log(`\nTo come back to this later, run \`npx showpilot\` in your project again (it remembers ${dir}).`);
   process.exit(ok ? 0 : 1);
 }

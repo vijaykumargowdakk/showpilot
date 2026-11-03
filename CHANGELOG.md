@@ -5,9 +5,11 @@ project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- Changed: the guided start no longer creates anything inside your code repository. It asks where to save the videos, defaulting to a folder next to your project (`my-app-videos`); you can also type another folder, or choose a `video` folder inside the project. The link is remembered in `SHOWPILOT_HOME/projects.json`, so `npx showpilot` in the project opens its videos again. The brief records `source:` (where the app code is) so an AI assistant can read it from the videos folder. The narrator voice and browser were already shared by every project in `SHOWPILOT_HOME`; a second project never downloads them again.
+
 - Fixed: on Windows, after the first menu the next question took no typing (the program that asked the first question still held the keyboard). It now lets go before handing over. Tested in a real Windows console (ConPTY), for the menu, the first-run setup and `showpilot new`.
 
-- `npx showpilot` is now the whole setup: in a project it asks where to put things and how to reach your app (suggesting a web address or built folder from your `package.json`), creates the `video` folder, installs Showpilot there, and carries on into `showpilot new`. In a project that is already set up, it opens a menu.
+- `npx showpilot` is now the whole setup: in a project it asks where to put things and how to reach your app (suggesting a web address or built folder from your `package.json`), creates the videos folder, installs Showpilot there, and carries on into `showpilot new`. In a project that is already set up, it opens a menu.
 - Questions use arrow keys (or a number) to choose, and a line to type with the suggestion shown, like Claude Code. Without a terminal (scripts, AI assistants) they read plain lines, and every question still has a flag.
 - `showpilot new` offers to set up the narrator voice right there (defaulting to No for the big download), then plays the samples.
 - Recording says plainly when nothing is answering at `app.url`, instead of waiting.

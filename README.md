@@ -51,7 +51,7 @@ npx showpilot
 ```
 
 That's the whole setup. It asks questions you answer with the arrow keys (or a number), and does the rest:
-- creates a `video` folder next to your app, and installs Showpilot there;
+- asks where to save the videos, by default a folder **next to** your project (`my-app-videos`), so your code repository gets no new files; it remembers the link, and `npx showpilot` in your project finds it again;
 - suggests how to reach your app (a web address or built folder, guessed from your `package.json`);
 - asks what the video is for, how long, the tone, who narrates it and who writes the script;
 - offers to set up the narrator voice (a 1–3 GB download), and plays samples so you can pick one.
@@ -101,7 +101,7 @@ export default defineConfig({
 theme. Start your dev server, or run your build, before recording. Use fictional demo data.
 
 **3. Make the video.** Ask your AI assistant to *"make the launch video with Showpilot"*, or write the script yourself,
-then `npx showpilot check`, `voice`, `record` and `render` as above. Run all of this from the `video/` folder.
+then `npx showpilot check`, `voice`, `record` and `render` as above. Run all of this from the videos folder.
 
 **4. Commit the right things.** Commit `showpilot.config.ts`, `cuts/` (briefs, scripts, actions), `lexicon.json`,
 `AGENTS.md` and `.claude/skills/showpilot/`. Don't commit `out/`: it holds recordings and videos, and `new` adds it to

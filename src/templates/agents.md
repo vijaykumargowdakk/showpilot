@@ -5,6 +5,7 @@ This project makes its demo videos with [Showpilot](https://github.com/vijaykuma
 `cuts/<id>.ts`, and the config is `showpilot.config.ts`. When asked for a video:
 
 1. **Agree the brief.** Read `cuts/<id>.brief.md`. If it's missing, ask the user for:
+   - (if the brief has a `source:` line, the app's code is in that folder; read it there)
    - purpose (launch, walkthrough, tutorial, update), audience, length, and tone (energetic, professional, friendly, calm, playful)
    - narration: AI voice, their own voice, or silent with subtitles
    - what it must show

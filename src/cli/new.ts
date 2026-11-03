@@ -70,7 +70,7 @@ const author = await choose<Author>('script', 'Who writes the script?', AUTHORS,
 const goals = flag('goals') ?? (await ask('What must it show? (Enter to fill in later)', ''));
 // The product's name from the config (as written there), for the title.
 const product = /brand:\s*\{[^}]*?name:\s*(['"])(.*?)\1/s.exec(readFileSync(configFile, 'utf8'))?.[2] ?? path.basename(PROJECT);
-const brief: Brief = { id: name, title: flag('title') ?? `${product}: ${purpose}`, purpose, audience, length, tone, narration, author, goals: goals.replace(/;\s*/g, '\n- ').replace(/^(?=.)/, '- ') };
+const brief: Brief = { id: name, title: flag('title') ?? `${product}: ${purpose}`, purpose, audience, length, tone, narration, author, ...(flag('source') ? { source: flag('source') } : {}), goals: goals.replace(/;\s*/g, '\n- ').replace(/^(?=.)/, '- ') };
 const briefFile = path.join(PROJECT, 'cuts', `${name}.brief.md`);
 mkdirSync(path.dirname(briefFile), { recursive: true });
 writeFileSync(briefFile, writeBrief(brief));
