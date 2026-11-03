@@ -20,6 +20,8 @@ export type Config = {
     /** Clear localStorage before each take (default true), so every chapter starts from the same state. */
     resetStorage?: boolean;
     colorScheme?: 'light' | 'dark';
+    /** The window's title bar text (default: brand.name), e.g. when the video's brand isn't the app's name. */
+    title?: string;
   };
   brand: {
     /** Shown in the window title bar, the closing card and the thumbnail. */

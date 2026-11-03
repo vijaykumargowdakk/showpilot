@@ -33,6 +33,7 @@ export default defineConfig({
 | `storage` | localStorage keys and values set before the app's scripts run, for example to skip a welcome tour or pick a theme. |
 | `resetStorage` | Clear localStorage before each take (default `true`), so every chapter starts from the same state. Storage is reset once per take, not on every reload, so a chapter can show that the app keeps its work. |
 | `colorScheme` | `'light'` (default) or `'dark'`, for apps that follow the system theme. |
+| `title` | The text in the window's title bar (default: `brand.name`). Useful when the video's brand isn't the app's name. |
 
 Recordings are 1920×1080 at a pixel density of 1, rendered at 1080p60.
 

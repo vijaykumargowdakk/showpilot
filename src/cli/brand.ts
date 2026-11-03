@@ -8,11 +8,12 @@ import type { Brand } from '../video/plan';
 
 export function brandFor(config: Config): Brand {
   const { logo } = config.brand;
-  if (!logo) return { ...config.brand };
+  const brand = { ...config.brand, windowTitle: config.app.title };
+  if (!logo) return brand;
   const src = fromProject(logo);
   if (!existsSync(src)) throw new Error(`brand.logo: ${src} does not exist`);
   const logoFile = `_brand/logo${path.extname(src)}`;
   mkdirSync(path.join(OUT, '_brand'), { recursive: true });
   copyFileSync(src, path.join(OUT, logoFile));
-  return { ...config.brand, logoFile };
+  return { ...brand, logoFile };
 }

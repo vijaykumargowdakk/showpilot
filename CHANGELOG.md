@@ -5,6 +5,10 @@ project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- `app.title` sets the window's title bar text, when the video's brand isn't the app's name.
+- Web chapters show the site's host (e.g. github.com) in the window's title bar instead of the brand.
+- A showcase video, made with Showpilot from `examples/showcase`.
+
 ## [0.1.0] - 2026-11-03
 
 First public release.
