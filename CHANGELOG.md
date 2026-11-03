@@ -5,6 +5,8 @@ project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- The package no longer includes compiled Python files (`__pycache__`); 0.2.0 shipped three by accident.
+- The README installs from npm, and `docs/RELEASING.md` explains trusted publishing and publishing from your own computer.
 - `npx showpilot` is now the whole setup: in a project it asks where to put things and how to reach your app (suggesting a web address or built folder from your `package.json`), creates the `video` folder, installs Showpilot there, and carries on into `showpilot new`. In a project that is already set up, it opens a menu.
 - Questions use arrow keys (or a number) to choose, and a line to type with the suggestion shown, like Claude Code. Without a terminal (scripts, AI assistants) they read plain lines, and every question still has a flag.
 - `showpilot new` offers to set up the narrator voice right there (defaulting to No for the big download), then plays the samples.
