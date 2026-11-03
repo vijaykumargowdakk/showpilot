@@ -45,6 +45,8 @@ const COMMANDS = {
   subtitles: ['Write the .srt, the timestamped script and the chapter list', ts('src/cli/subtitles.ts')],
   dub: ['Lay narration over a rendered silent cut, without rendering again', ts('src/cli/dub.ts'), 'dub'],
   frames: ['Contact sheet of recorded frames, to check a take (ch:beat ...)', ts('src/cli/frames.ts')],
+  dictate: ['Talk the video through (--record, or an audio file); it becomes cuts/<id>.script.md', ts('src/cli/dictate.ts')],
+  align: ['Put your own recorded voiceover on a rendered silent cut, line by line', ts('src/cli/align.ts'), 'dub'],
 };
 
 const command = args.shift();

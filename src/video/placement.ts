@@ -112,6 +112,18 @@ export function mapByWords(lines: string[], words: { w: string; start: number; e
   return spansFrom(picked, words.map((w) => ({ start: w.start, end: w.end })));
 }
 
+/**
+ * A transcript says which words are which line, but its word times can be off by a few tenths of a second; silence
+ * detection knows exactly where speech starts. Each line's start moves to the speech onset within 0.7 s of it.
+ */
+export function snapToSpeech(spans: (Span | null)[], speech: Span[]): (Span | null)[] {
+  return spans.map((span) => {
+    if (!span) return null;
+    const onset = speech.map((s) => s.start).sort((a, b) => Math.abs(a - span.start) - Math.abs(b - span.start))[0];
+    return onset !== undefined && Math.abs(onset - span.start) <= 0.7 && onset < span.end - 0.2 ? { start: ms(Math.max(0, onset - 0.05)), end: span.end } : span;
+  });
+}
+
 function spansFrom(starts: (number | null)[], speech: Span[]): (Span | null)[] {
   return starts.map((start, i) => {
     if (start === null) return null;

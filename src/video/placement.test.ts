@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fit, GAP, MAX_TEMPO, mapBySilence, mapByWords, voicedCues } from './placement';
+import { fit, GAP, MAX_TEMPO, mapBySilence, mapByWords, snapToSpeech, voicedCues } from './placement';
 
 describe('fitting narration into its slots', () => {
   it('leaves lines that fit alone, speeds up long ones a little, and never overlaps', () => {
@@ -51,6 +51,14 @@ describe('finding each line in your own recording', () => {
     ]);
     expect(spans[1]).toBeNull();
     expect(spans[0]!.end).toBeLessThan(10.5);
+  });
+
+  it("snaps a transcript's loose word times to the exact speech onsets, but only nearby ones", () => {
+    const speech = [
+      { start: 1.5, end: 3 },
+      { start: 6.3, end: 9 },
+    ];
+    expect(snapToSpeech([{ start: 1.0, end: 3.2 }, { start: 4.0, end: 5.0 }, null], speech)).toEqual([{ start: 1.45, end: 3.2 }, { start: 4.0, end: 5.0 }, null]);
   });
 
   it('uses a transcript when there is one, in order, so repeated words go to the right line', () => {

@@ -1,4 +1,4 @@
-// showpilot setup-voice: creates the Python environment in SHOWPILOT_HOME, installs Kokoro and a torch build that fits
+// showpilot setup-voice [--dictation]: creates the Python environment in SHOWPILOT_HOME, installs Kokoro and a torch build that fits
 // this computer (CUDA with an NVIDIA GPU, the default build on macOS for Apple Silicon, the CPU build elsewhere), then
 // downloads the model and voices. Every download goes into SHOWPILOT_HOME.
 import { spawnSync } from 'node:child_process';
@@ -33,6 +33,13 @@ console.log(nvidia ? 'NVIDIA GPU found: installing torch with CUDA.' : process.p
 
 if (!existsSync(PYTHON)) must(findPython(), ['-m', 'venv', VENV]);
 const pip = (...args) => must(PYTHON, ['-m', 'pip', 'install', '--retries', '10', '--timeout', '60', ...args]);
+
+// --dictation adds local speech-to-text (faster-whisper) for `showpilot dictate` and `showpilot align`.
+if (process.argv.includes('--dictation')) {
+  pip('faster-whisper');
+  console.log('\nDictation is ready: the speech model downloads into SHOWPILOT_HOME the first time it is used.');
+  process.exit(0);
+}
 pip('--upgrade', 'pip');
 pip('torch', ...(torchIndex ? ['--index-url', torchIndex] : []));
 pip('-r', path.join(VOICE_DIR, 'requirements.txt'));
