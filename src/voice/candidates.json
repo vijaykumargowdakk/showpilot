@@ -1,0 +1,27 @@
+{
+  "speeds": [1.0, 0.92],
+  "voices": [
+    { "id": "am_michael", "accent": "American", "gender": "male", "mix": { "am_michael": 1 } },
+    { "id": "am_fenrir", "accent": "American", "gender": "male", "mix": { "am_fenrir": 1 } },
+    { "id": "am_onyx", "accent": "American", "gender": "male", "mix": { "am_onyx": 1 } },
+    { "id": "am_eric", "accent": "American", "gender": "male", "mix": { "am_eric": 1 } },
+    { "id": "am_liam", "accent": "American", "gender": "male", "mix": { "am_liam": 1 } },
+    { "id": "am_puck", "accent": "American", "gender": "male", "mix": { "am_puck": 1 } },
+    { "id": "am_adam", "accent": "American", "gender": "male", "mix": { "am_adam": 1 } },
+    { "id": "am_echo", "accent": "American", "gender": "male", "mix": { "am_echo": 1 } },
+    { "id": "bm_george", "accent": "British", "gender": "male", "mix": { "bm_george": 1 } },
+    { "id": "bm_lewis", "accent": "British", "gender": "male", "mix": { "bm_lewis": 1 } },
+    { "id": "bm_daniel", "accent": "British", "gender": "male", "mix": { "bm_daniel": 1 } },
+    { "id": "bm_fable", "accent": "British", "gender": "male", "mix": { "bm_fable": 1 } },
+    { "id": "af_bella", "accent": "American", "gender": "female", "mix": { "af_bella": 1 } },
+    { "id": "af_nicole", "accent": "American", "gender": "female", "mix": { "af_nicole": 1 } },
+    { "id": "af_sarah", "accent": "American", "gender": "female", "mix": { "af_sarah": 1 } },
+    { "id": "af_nova", "accent": "American", "gender": "female", "mix": { "af_nova": 1 } },
+    { "id": "bf_emma", "accent": "British", "gender": "female", "mix": { "bf_emma": 1 } },
+    { "id": "bf_isabella", "accent": "British", "gender": "female", "mix": { "bf_isabella": 1 } },
+    { "id": "blend_michael_fenrir", "accent": "American blend", "gender": "male", "mix": { "am_michael": 0.6, "am_fenrir": 0.4 } },
+    { "id": "blend_onyx_george", "accent": "American/British blend", "gender": "male", "mix": { "am_onyx": 0.5, "bm_george": 0.5 } },
+    { "id": "blend_fenrir_eric", "accent": "American blend", "gender": "male", "mix": { "am_fenrir": 0.7, "am_eric": 0.3 } },
+    { "id": "blend_bella_sarah", "accent": "American blend", "gender": "female", "mix": { "af_bella": 0.6, "af_sarah": 0.4 } }
+  ]
+}
