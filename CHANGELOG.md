@@ -5,6 +5,8 @@ project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-04
+
 - `showpilot listen`: transcribes the narration on your computer and lists words the narrator said differently from the script, with the lexicon entries to add. "Showpilot" is now said as "show pilot".
 - README: a "Use it in your own project" section, and the showcase GIF from the 94-second video.
 - `showpilot new`: a guided start that asks the purpose, audience, length, tone, narrator and who writes the script, and writes a brief (`cuts/<id>.brief.md`). Every question also has a flag.
