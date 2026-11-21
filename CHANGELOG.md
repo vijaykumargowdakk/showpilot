@@ -5,6 +5,8 @@ project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- `showpilot/package.json` can be imported, so tools that read a package's version or metadata work with Showpilot.
+
 ## [0.3.0] - 2026-11-04
 
 - Changed: the guided start no longer creates anything inside your code repository. It asks where to save the videos, defaulting to a folder next to your project (`my-app-videos`); you can also type another folder, or choose a `video` folder inside the project. The link is remembered in `SHOWPILOT_HOME/projects.json`, so `npx showpilot` in the project opens its videos again. The brief records `source:` (where the app code is) so an AI assistant can read it from the videos folder. The narrator voice and browser were already shared by every project in `SHOWPILOT_HOME`; a second project never downloads them again.
