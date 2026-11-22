@@ -27,7 +27,8 @@
     "showpilot": "bin/showpilot.mjs"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
   },
   "files": [
     "bin",
