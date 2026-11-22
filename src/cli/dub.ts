@@ -3,7 +3,7 @@
 // starts where its subtitle appears. Writes out/<cut>/<cut>-voiced.mp4 and <cut>-voiced.srt, timed to the voice.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { loadConfig, loadCut } from '../config';
+import { loadConfig, loadCut, musicOf } from '../config';
 import { OUT } from '../paths.mjs';
 import { planCut } from '../video/plan';
 import { fit, lineSlots, voicedCues } from '../video/placement';
@@ -13,6 +13,7 @@ import { mixOnto, report } from './mix';
 type Voice = Record<string, { file: string; duration: number; captions: Caption[] }>;
 
 const config = await loadConfig();
+const music = musicOf(config);
 const cut = await loadCut(process.argv[2]);
 if (!cut.silent) throw new Error(`${cut.id} is not a silent cut; its narration is already in the render`);
 const dir = path.join(OUT, cut.id);
@@ -32,6 +33,6 @@ const clips = lineSlots(cut, plan).map((s) => {
 const timed = fit(clips);
 const summary = report(timed);
 const output = path.join(dir, `${cut.id}-voiced.mp4`);
-mixOnto(video, timed, plan.frames / plan.fps, output);
+mixOnto(video, timed, plan.frames / plan.fps, output, music);
 writeFileSync(path.join(dir, `${cut.id}-voiced.srt`), toSrt(voicedCues(timed)));
 console.log(`${summary}\n→ ${output}\n→ ${path.join(dir, `${cut.id}-voiced.srt`)}`);

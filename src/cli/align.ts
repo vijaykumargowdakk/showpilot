@@ -6,7 +6,7 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { loadConfig, loadCut } from '../config';
+import { loadConfig, loadCut, musicOf } from '../config';
 import { OUT, PYTHON, VOICE_DIR } from '../paths.mjs';
 import { planCut } from '../video/plan';
 import { fit, lineSlots, mapBySilence, mapByWords, snapToSpeech, voicedCues, type Span } from '../video/placement';
@@ -20,6 +20,7 @@ const args = process.argv.slice(2);
 const [id, recording] = args.filter((a) => !a.startsWith('--'));
 if (!id || !recording) throw new Error('Usage: showpilot align <id> <your recording>');
 const config = await loadConfig();
+const music = musicOf(config);
 const cut = await loadCut(id);
 if (!cut.silent) throw new Error(`${id} is narrated by the AI voice; make it silent: true to put your own voice on it`);
 const dir = path.join(OUT, cut.id);
@@ -82,7 +83,7 @@ if (!clips.length) throw new Error('No line was found in the recording. Was it r
 const timed = fit(clips);
 const summary = report(timed);
 const output = path.join(dir, `${cut.id}-voiced.mp4`);
-mixOnto(video, timed, plan.frames / plan.fps, output);
+mixOnto(video, timed, plan.frames / plan.fps, output, music);
 writeFileSync(path.join(dir, `${cut.id}-voiced.srt`), toSrt(voicedCues(timed)));
 console.log(`Lines found from the ${how}. ${summary}`);
 if (missing.length) console.log(`  ! not found in the take (left silent): ${missing.join(', ')}`);

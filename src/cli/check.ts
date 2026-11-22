@@ -2,7 +2,7 @@
 // It opens no browser, so it is quick, and CI can run it to catch a broken config or cut.
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { loadConfig, loadCut } from '../config';
+import { loadConfig, loadCut, musicOf } from '../config';
 import { formatLength, readBrief } from '../guide/brief';
 import { PROJECT } from '../paths.mjs';
 import { lineSeconds, narratedLines } from '../recorder/script';
@@ -12,7 +12,11 @@ const cut = await loadCut(process.argv[2]);
 const problems: string[] = [];
 
 console.log(`${cut.title} (${cut.id})${cut.silent ? ', silent: paced for reading, with an .srt' : ''}`);
-console.log(`App: ${config.app.serve ? `serves ${config.app.serve}` : config.app.url}   Brand: ${config.brand.name}\n`);
+const music = musicOf(config);
+console.log(
+  `App: ${config.app.serve ? `serves ${config.app.serve}` : config.app.url}   Brand: ${config.brand.name}` +
+    `${music ? `   Music: ${path.relative(PROJECT, music.file)}` : ''}\n`,
+);
 let total = 0;
 cut.chapters.forEach((c, i) => {
   const lines = c.beats.filter((b) => b.say);

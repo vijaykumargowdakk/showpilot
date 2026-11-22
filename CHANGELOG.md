@@ -5,6 +5,7 @@ project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- Background music: `music: 'assets/track.mp3'` in the config plays your own track under the whole video. It loops, fades in and out, sits well under the narration, and dips a further 12 dB while the narrator speaks. In a silent cut it is the only sound; `dub` and `align` put it back under the new narration. `volume` moves it in dB; `render --clean` leaves it out; `check` shows it.
 - `showpilot/package.json` can be imported, so tools that read a package's version or metadata work with Showpilot.
 
 ## [0.3.0] - 2026-11-04

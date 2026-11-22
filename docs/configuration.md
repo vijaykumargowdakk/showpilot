@@ -20,6 +20,7 @@ export default defineConfig({
   },
   voice: { mix: { am_fenrir: 0.7, am_eric: 0.3 }, speed: 0.92, energy: 1 },
   lexicon: 'lexicon.json',
+  music: 'assets/track.mp3',      // or { file: 'assets/track.mp3', volume: -3 }
 });
 ```
 
@@ -55,6 +56,23 @@ Silent cuts don't need a voice.
 
 A JSON file of written form → spoken form, merged over the built-in list (keyboard shortcuts, common acronyms,
 file names). Subtitles keep the written form. See [voice](voice.md#pronunciation).
+
+## `music`
+
+A music file (MP3, WAV, M4A, or anything ffmpeg reads), relative to the project, played under the whole video.
+Showpilot doesn't come with any music: use a track you have the rights to.
+
+- It **loops** if it is shorter than the video, **fades in** over 1.5 s and **fades out** over the last 3 s.
+- Under narration it sits at about -24 LUFS, well below the voice (-16), and **dips** a further 12 dB while the
+  narrator speaks: it goes down just before each line and comes back up just after. Lines less than 1.5 s apart
+  share one dip, so the music doesn't bob up between sentences.
+- In a silent cut it is the only sound, so it plays at -16 LUFS without dips. When you `dub` or `align` the cut
+  later, the voiced version gets the music again, dipping under the new narration.
+- `volume` moves it up or down in dB, for a track that should sit louder or quieter (e.g. `volume: -3`).
+- `render --clean` and `--still` leave it out.
+
+The level is measured from the track itself, so a quiet acoustic piece and a loud electronic one end up at the
+same loudness.
 
 ## Environment variables
 

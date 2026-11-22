@@ -2,16 +2,19 @@
 // Plans the camera and cursor from the recording, then renders out/<cut>/<cut>.mp4, or with --still only those frames
 // as PNGs in out/<cut>/stills/ to check a layout. --clean renders <cut>-clean.mp4 with no captions and no audio (the
 // scenes' on-screen words stay); a silent cut always renders that way, as <cut>.mp4. Every video render also writes
-// the .srt, the timestamped script and the chapter list. Concurrency is half the CPU threads (RENDER_CONCURRENCY
-// overrides it) so the computer stays usable.
+// the .srt, the timestamped script and the chapter list. With `music` in the config, it plays under the video (a
+// silent cut's only sound), dipping under the narration; --clean renders stay without it. Concurrency is half the
+// CPU threads (RENDER_CONCURRENCY overrides it) so the computer stays usable.
 import { renderMedia, renderStill, selectComposition } from '@remotion/renderer';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, rmSync } from 'node:fs';
 import path from 'node:path';
-import { loadConfig, loadCut } from '../config';
+import { loadConfig, loadCut, musicOf } from '../config';
 import { OUT } from '../paths.mjs';
+import { narrationSpans } from '../video/music';
 import { planCut, writePlan } from '../video/plan';
 import { brandFor } from './brand';
 import { chromiumOptions, withBundle } from './bundle';
+import { addMusic } from './mix';
 import { writeSubtitles } from './subtitles';
 
 const args = process.argv.slice(2);
@@ -21,9 +24,13 @@ const config = await loadConfig();
 const cut = await loadCut(args.find((a, i) => !a.startsWith('--') && args[i - 1] !== '--still'));
 const clean = flag('--clean') || !!cut.silent;
 const brand = brandFor(config);
+const music = flag('--clean') ? undefined : musicOf(config);
 console.log(`planned ${path.relative(OUT, writePlan(cut, brand))}`);
+const plan = planCut(cut, brand);
 
 const output = path.join(OUT, cut.id, `${cut.id}${flag('--4k') ? '-4k' : ''}${flag('--clean') ? '-clean' : ''}.mp4`);
+// With music, the render goes to a hidden file first and the music is mixed from it into the output.
+const rendered = music ? path.join(path.dirname(output), `.${path.basename(output, '.mp4')}-unmixed.mp4`) : output;
 await withBundle(cut.id, async (serveUrl) => {
   const inputProps = { cut: cut.id, clean };
   const composition = await selectComposition({ serveUrl, id: 'Cut', inputProps, chromiumOptions });
@@ -46,7 +53,7 @@ await withBundle(cut.id, async (serveUrl) => {
     crf: 17,
     audioBitrate: '320k',
     muted: clean,
-    outputLocation: output,
+    outputLocation: rendered,
     concurrency: process.env.RENDER_CONCURRENCY ? Number(process.env.RENDER_CONCURRENCY) : '50%',
     scale: flag('--4k') ? 2 : 1,
     chromiumOptions,
@@ -59,6 +66,11 @@ await withBundle(cut.id, async (serveUrl) => {
       }
     },
   });
+  if (music) {
+    console.log(`mixing in ${path.basename(music.file)}`);
+    addMusic(rendered, music, plan.frames / plan.fps, narrationSpans(plan), !clean, output);
+    rmSync(rendered);
+  }
   console.log(`\n→ ${output}`);
-  for (const f of writeSubtitles(path.join(OUT, cut.id), planCut(cut, brand), cut.title)) console.log(`→ ${f}`);
+  for (const f of writeSubtitles(path.join(OUT, cut.id), plan, cut.title)) console.log(`→ ${f}`);
 });
