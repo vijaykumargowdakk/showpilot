@@ -39,7 +39,14 @@ export type Config = {
   voice?: { mix: VoiceMix; speed: number; energy?: number };
   /** Extra pronunciations, relative to the project folder (merged over the built-in ones). */
   lexicon?: string;
+  /**
+   * Background music under the whole video, relative to the project folder: your own file (nothing is bundled). It
+   * loops if shorter than the video, fades in and out, and dips while the narrator speaks. `volume` shifts it in dB.
+   */
+  music?: string | { file: string; volume?: number };
 };
+
+export type Music = { file: string; volume: number };
 
 export const defineConfig = (c: Config): Config => c;
 
@@ -71,3 +78,12 @@ export async function loadCut(id: string | undefined): Promise<Cut> {
 
 /** A path from the config, relative to the project folder. */
 export const fromProject = (p: string) => path.resolve(PROJECT, p);
+
+/** The configured music, with its file resolved and checked, or undefined when there is none. */
+export function musicOf(c: Config): Music | undefined {
+  if (!c.music) return undefined;
+  const { file, volume = 0 } = typeof c.music === 'string' ? { file: c.music } : c.music;
+  const resolved = fromProject(file);
+  if (!existsSync(resolved)) throw new Error(`music: no file at ${resolved}`);
+  return { file: resolved, volume };
+}

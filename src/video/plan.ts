@@ -37,7 +37,8 @@ export type ChapterPlan = {
   ripples: { f: number; x: number; y: number }[];
   keys: { f: number; keys: string[] }[];
   callouts: { f: number; to: number; box: { x: number; y: number; width: number; height: number }; text: string }[];
-  audio: { f: number; src: string }[];
+  /** Narration clips: the frame each starts on and its length in seconds. */
+  audio: { f: number; src: string; d: number }[];
   phrases: { f: number; to: number; words: { w: string; f: number }[] }[];
   /** Each line's text and the frame it starts on, for the script and subtitle files. */
   lines: { f: number; text: string }[];
@@ -145,7 +146,7 @@ function sceneChapter(cut: Cut, ci: number, voice: Voice, out: string): ChapterP
   chapter.beats.forEach((b, bi) => {
     const v = voice[beatId(ci, bi)];
     if (!v) throw new Error(`No narration for ${beatId(ci, bi)}; run npm run voice -- ${cut.id}`);
-    if (v.file) audio.push({ f: Math.round(t * FPS), src: path.relative(out, v.file).replaceAll('\\', '/') });
+    if (v.file) audio.push({ f: Math.round(t * FPS), src: path.relative(out, v.file).replaceAll('\\', '/'), d: v.duration });
     lines.push({ f: Math.round(t * FPS), text: cleanText(b.say ?? '') });
     const p = phrasesOf(v.captions, t, t + v.duration + 1);
     phrases.push(...p);
@@ -192,7 +193,7 @@ function captureChapter(cut: Cut, ci: number, voice: Voice, out: string): Chapte
     const v = voice[line.id];
     if (!v) continue;
     lines.push({ f: F(line.t), text: cleanText(line.say) });
-    if (v.file) audio.push({ f: Math.round(line.t * FPS), src: path.relative(out, v.file).replaceAll('\\', '/') });
+    if (v.file) audio.push({ f: Math.round(line.t * FPS), src: path.relative(out, v.file).replaceAll('\\', '/'), d: v.duration });
     phrases.push(...phrasesOf(v.captions, line.t, frames / FPS));
   }
   const callouts = tl.events

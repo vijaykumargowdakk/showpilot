@@ -55,3 +55,11 @@ Node scripts so they run on every OS without Python. The session hook installs w
 `npm install` rewrites the committed lockfile. Maintainer's input: asked for the setup to be followed in every session.
 
 **Questions in a terminal are tested in a real pseudo-terminal, and the program that asks closes stdin before starting another.** On Windows a paused (not closed) terminal input keeps a read pending that takes keystrokes meant for a child program, so after the guided start's first menu the next question accepted no typing, even though the unit tests with a simulated terminal passed. The launcher asks `isatty(0)` rather than touching `process.stdin`, and `ui.close()` destroys the real stdin. To test prompts, drive `node bin/showpilot.mjs` through ConPTY (the `pywinpty` Python package) and look at the screen; simulated key presses alone missed this.
+
+**2026-11-22: Music is mixed in by ffmpeg after the render, and dips on a planned curve rather than a sidechain.**
+Music is the one sound that `render`, `dub` and `align` all need, and the last two never re-render, so it is mixed
+with ffmpeg after Remotion in `render` and inside the existing narration mix in `dub` and `align`; a silent render
+gets it as its only sound, and the voiced versions rebuild it under their own narration. The dips come from where
+each line is placed (the render plan, or the dub's fitted times), not from a compressor listening to the voice: the
+music is already down when a line starts, nothing pumps on breaths, and the result is the same on every run. The
+track is loudness-normalised first, so any song lands at the same level. Maintainer's input: picked issue #3 next.

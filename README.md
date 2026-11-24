@@ -23,8 +23,8 @@ Change the UI, run it again, and the whole video is re-shot in one command. No s
   line. Or go silent: paced for reading, with an `.srt` subtitle file for closed captions (VLC, YouTube).
 - **Scenes between the takes.** Kinetic text, badges that pop in as they are named, a closing card, and live app
   footage behind them.
-- **Everything else a launch needs.** Chapter titles, a YouTube chapter list, thumbnails, and dubbing narration onto a
-  finished render without rendering it again.
+- **Everything else a launch needs.** Chapter titles, a YouTube chapter list, thumbnails, background music that dips
+  while the narrator speaks, and dubbing narration onto a finished render without rendering it again.
 
 ## How it works
 
