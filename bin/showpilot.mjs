@@ -4,8 +4,9 @@
 // caches moved into SHOWPILOT_HOME, and heavy stages (voice, record, render, dub) holding a lock so they never run at
 // the same time. Before a command runs, what it needs (Node, ffmpeg, the browser, the voice) is checked, and the
 // browser is downloaded automatically the first time it is needed.
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, statfsSync } from 'node:fs';
+import { constants } from 'node:os';
 import path from 'node:path';
 import { isatty } from 'node:tty';
 import { fileURLToPath } from 'node:url';
@@ -31,6 +32,7 @@ if (home) process.env.SHOWPILOT_HOME = path.resolve(home);
 // Imported after the flags are applied, because paths.mjs reads them once.
 const { env, PKG, PROJECT, PYTHON, REDIRECTS } = await import('../src/paths.mjs');
 const { acquire, release } = await import('../src/cli/lock.mjs');
+const { reap, signalTree } = await import('../src/cli/stop.mjs');
 
 // Every command starts with friendly.mjs, so a failure is a sentence rather than a stack trace.
 const friendly = ['--import', new URL('../src/cli/friendly.mjs', import.meta.url).href];
@@ -129,12 +131,26 @@ mkdirSync(REDIRECTS.TEMP, { recursive: true }); // the browser download (in pref
 preflight(command);
 const [, [cmd, base], lock] = COMMANDS[command];
 if (lock) acquire(lock);
-let status = 1;
-try {
-  const r = spawnSync(cmd, [...base, ...args], { stdio: 'inherit', env: env() });
-  if (r.error) console.error(r.error.code === 'ENOENT' && cmd === PYTHON ? 'The voice is not set up yet: run `showpilot setup-voice`.' : r.error.message);
-  status = r.status ?? 1;
-} finally {
-  if (lock) release();
+const child = spawn(cmd, [...base, ...args], { stdio: 'inherit', env: env() });
+// A signal to this launcher alone (an IDE's stop button, `kill`) stops the command and everything it started, and the
+// lock is held until the command has exited, so no other stage starts while it is still running (see stop.mjs).
+let stopping = false;
+let tree = [];
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+  process.on(signal, () => {
+    if (stopping || !child.pid) return;
+    stopping = true;
+    tree = signalTree(child.pid, signal);
+    setTimeout(() => reap(tree, 0), 5000).unref();
+  });
 }
-process.exit(status);
+child.on('error', (e) => {
+  console.error(e.code === 'ENOENT' && cmd === PYTHON ? 'The voice is not set up yet: run `showpilot setup-voice`.' : e.message);
+  if (lock) release();
+  process.exit(1);
+});
+child.on('close', async (code, signal) => {
+  if (stopping) await reap(tree, 3000);
+  if (lock) release();
+  process.exit(code ?? 128 + (constants.signals[signal] ?? 0));
+});
