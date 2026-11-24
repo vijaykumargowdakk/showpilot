@@ -56,6 +56,7 @@ const COMMANDS = {
   listen: ['Listen back to the narration and list words the narrator says wrongly', ts('src/cli/listen.ts'), 'voice'],
   voice: ['Speak every line of a cut with the configured voice', ts('src/cli/voice.ts'), 'voice'],
   record: ['Drive the app and record each chapter (--chapter N, --from N)', ts('src/recorder/record.ts'), 'record'],
+  studio: ['Preview a recorded cut in Remotion Studio: play and scrub it without rendering', ts('src/cli/studio.ts')],
   render: ['Render the video (--clean: no captions or audio; --still 300,900: frames as PNGs)', ts('src/cli/render.ts'), 'render'],
   thumbnail: ["Render the cut's thumbnail variants as JPEGs", ts('src/cli/thumbnail.ts'), 'render'],
   subtitles: ['Write the .srt, the timestamped script and the chapter list', ts('src/cli/subtitles.ts')],

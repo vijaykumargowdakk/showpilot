@@ -1,6 +1,6 @@
 # Showpilot: project status
 
-*Last updated 2026-11-22.*
+*Last updated 2026-11-24.*
 
 ## Read first
 - This file for status
@@ -32,7 +32,7 @@ node bin/showpilot.mjs record tour --project examples/hello   # then: render tou
 | M2 | Showcase | `examples/showcase`, README GIF, window titles | Done (PR #7) |
 | M3 | Guided videos | `showpilot new`, voice picking, ways to get a script | Done (PR #8) |
 | M4 | npm package | Publish `showpilot` (#6) | Done: on npm since 0.2.0; 0.3.0 published from CI with trusted publishing |
-| M5 | Roadmap | Video sizes (#2), background music (#3, done: `music` in the config), macOS testing (#4), `studio` live preview (#5) | Each issue closed |
+| M5 | Roadmap | Video sizes (#2), background music (#3, done: `music` in the config), macOS testing (#4), `studio` live preview (#5, done: `showpilot studio`) | Each issue closed |
 
 ## Known issues
 - npm also lists a `0.0.0-stage` version of `showpilot`. It isn't the `latest` tag, so installs don't get it.

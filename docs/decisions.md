@@ -63,3 +63,11 @@ gets it as its only sound, and the voiced versions rebuild it under their own na
 each line is placed (the render plan, or the dub's fitted times), not from a compressor listening to the voice: the
 music is already down when a line starts, nothing pumps on breaths, and the result is the same on every run. The
 track is loudness-normalised first, so any song lands at the same level. Maintainer's input: picked issue #3 next.
+
+**2026-11-24: `showpilot studio` runs Remotion's own CLI, serves out/ in place, and holds no lock.** Starting Studio
+is documented only through Remotion's CLI, so `@remotion/cli` is a dependency (at the same version as the other
+Remotion packages) and `studio` runs its `studio` command with the render plan written first, out/ as the public
+folder and the cut passed as props. Studio serves the public folder where it is, so the junction/symlink trick
+render bundles need (they copy the public folder) isn't needed. Studio is an interactive window that stays open, so it
+holds no stage lock: a lock would block every recording and render for as long as it is open. Maintainer's input:
+picked issue #5 next.
