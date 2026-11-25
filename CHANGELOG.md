@@ -5,6 +5,7 @@ project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- `showpilot studio` picks up edits: saving the cut or the config while Studio is open writes the plan again and reloads the page, so scene words, holds and branding can be tuned without a restart.
 - Fixed: stopping `showpilot` from outside a terminal (an IDE's stop button, `kill`) left the command running (a recording, a render, Studio's server) and its stage lock looked free, so another heavy stage could start alongside it. The launcher now stops the command and everything it started, and holds the lock until it has exited.
 - `showpilot studio <cut>`: preview a recorded cut in Remotion Studio, without rendering. Play it, scrub it and step through frames, with the camera, cursor, captions and narration as they will render.
 - Background music: `music: 'assets/track.mp3'` in the config plays your own track under the whole video. It loops, fades in and out, sits well under the narration, and dips a further 12 dB while the narrator speaks. In a silent cut it is the only sound; `dub` and `align` put it back under the new narration. `volume` moves it in dB; `render --clean` leaves it out; `check` shows it.
