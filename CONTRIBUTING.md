@@ -13,10 +13,13 @@ Thanks for helping! Bug reports, ideas, docs fixes and code are all welcome.
 
 ```sh
 git clone https://github.com/vijaykumargowdakk/showpilot && cd showpilot
-npm install
+npm ci                # installs exactly what package-lock.json lists
 node bin/showpilot.mjs setup-browser
 npm run ci            # typecheck, lint, unit tests, and a check of the example
 ```
+
+Use `npm ci`, not `npm install`: with a different npm version, `npm install` rewrites `package-lock.json`, and the
+PR picks up an unrelated lockfile diff. `npm install <package>` is only for adding a dependency.
 
 Try changes on the example: `node bin/showpilot.mjs record tour --project examples/hello`, then `render`.
 Set `SHOWPILOT_HOME` if you want the browser and caches somewhere other than `~/.showpilot`.
