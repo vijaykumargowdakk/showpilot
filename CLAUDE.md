@@ -43,6 +43,8 @@ lines (`Co-Authored-By`, `Claude-Session`, "Generated with …"), leave them out
   regenerates FILEMAP.md; puts these rules, PROJECT_STATUS.md and a warning about the current branch in context.
 - **PreToolUse** (`.claude/hooks/guard.mjs`): blocks AI attribution in commits and PRs, commits and pushes on `main`
   or `claude/…`, and local merges into `main`; asks the maintainer before any PR merge.
-- **PostToolUse**: regenerates FILEMAP.md and marks edited files for the end-of-turn **Stop** review.
+- **PostToolUse**: regenerates FILEMAP.md and marks edited files for the end-of-turn **Stop** review. After a PR is
+  created (`.claude/hooks/pr-footer.mjs`), it reminds the session to read the PR back and remove any attribution
+  footer the GitHub tool appended on GitHub's side, where the guard can't see it.
 
 If a hook blocks something, fix the cause; don't work around the hook.
