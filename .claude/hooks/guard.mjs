@@ -8,14 +8,67 @@ const ATTRIBUTION = /co-authored-by:|claude-session:|generated with \[?claude/i;
 const PREFIXES = '`feat/…`, `fix/…`, `docs/…` or `chore/…`';
 
 const isProtected = (branch) => branch === 'main' || branch === 'master' || branch.startsWith('claude/');
-const git = (sub) => new RegExp(`\\bgit\\s+(?:-C\\s+\\S+\\s+)*${sub}(?=\\s|$|[;&|])`, 'm');
 const deny = (reason) => ({ decision: 'deny', reason });
 
+/** A shell command cut at `&&`, `||`, `;`, `|` and newlines that are outside quotes. */
+function splitCommand(command) {
+  const parts = [];
+  let part = '';
+  let quote = '';
+  for (let i = 0; i < command.length; i++) {
+    const c = command[i];
+    if (quote) {
+      if (c === '\\' && quote === '"') part += c + (command[++i] ?? '');
+      else {
+        if (c === quote) quote = '';
+        part += c;
+      }
+    } else if (c === '"' || c === "'") {
+      quote = c;
+      part += c;
+    } else if (c === '\\') {
+      part += c + (command[++i] ?? '');
+    } else if ('&|'.includes(c) && command[i + 1] === c) {
+      parts.push(part);
+      part = '';
+      i++;
+    } else if (c === ';' || c === '|' || c === '\n') {
+      parts.push(part);
+      part = '';
+    } else {
+      part += c;
+    }
+  }
+  return [...parts, part];
+}
+
+/**
+ * The git commands in a shell command, in the order they run, as [subcommand, ...words]. A part counts only if it
+ * starts with `git` (after any VAR=value), so text inside a commit message or a grep pattern isn't mistaken for one.
+ */
+function gitCommands(command) {
+  return splitCommand(command)
+    .map((part) => part.match(/^\s*(?:[A-Za-z_]\w*=\S*\s+)*git(?:\s+-C\s+\S+)*\s+([a-z][\w-]*)([\s\S]*)$/))
+    .filter(Boolean)
+    .map(([, sub, rest]) => [sub, ...rest.trim().split(/\s+/).filter(Boolean)]);
+}
+
+/** The branch a `git switch` or `git checkout` moves to, or undefined if it doesn't change branch. */
+function switchedTo([sub, ...words], isBranch) {
+  const after = (flags) => {
+    const i = words.findIndex((w) => flags.includes(w));
+    return i === -1 ? undefined : words[i + 1];
+  };
+  if (sub === 'switch') return after(['-c', '-C', '--create']) ?? words.find((w) => !w.startsWith('-'));
+  if (sub !== 'checkout' || words.includes('--')) return undefined;
+  const created = after(['-b', '-B']);
+  if (created) return created;
+  const [name, ...more] = words.filter((w) => !w.startsWith('-'));
+  return name && !more.length && isBranch(name) ? name : undefined;
+}
+
 // Branches a `git push` would update. A bare push (or HEAD) updates the current branch.
-function pushTargets(command, current) {
-  const match = command.match(/\bgit\s+(?:-C\s+\S+\s+)*push\b([^;&|\n]*)/);
-  if (!match) return [];
-  const words = match[1].trim().split(/\s+/).filter(Boolean);
+function pushTargets(words, current) {
   if (words.some((w) => w === '-d' || w === '--delete')) return [];
   const [, ...refspecs] = words.filter((w) => !w.startsWith('-'));
   if (!refspecs.length) return [current];
@@ -25,31 +78,36 @@ function pushTargets(command, current) {
   });
 }
 
-export function check(input, currentBranch) {
-  const tool = input.tool_name ?? '';
-  const args = input.tool_input ?? {};
-
-  if (tool === 'Bash') {
-    const command = String(args.command ?? '');
-    const branch = currentBranch();
-    if (git('commit').test(command)) {
+/**
+ * Each git command is judged on the branch it runs on: the current one, or the one an earlier `git switch` or
+ * `git checkout` in the same command moved to.
+ */
+function checkShell(command, currentBranch, isBranch) {
+  let branch = currentBranch();
+  for (const [sub, ...words] of gitCommands(command)) {
+    branch = switchedTo([sub, ...words], isBranch) ?? branch;
+    if (sub === 'commit') {
       if (ATTRIBUTION.test(command)) {
         return deny('No AI attribution in commits (CLAUDE.md): remove the Co-Authored-By / Claude-Session lines.');
       }
-      const createsBranch = /\b(?:switch\s+(?:-c|-C|--create)|checkout\s+-[bB])\s/.test(command);
-      if (!createsBranch && isProtected(branch)) {
-        return deny(`Don't commit on \`${branch}\`. Create a ${PREFIXES} branch from origin/main first.`);
-      }
+      if (isProtected(branch)) return deny(`Don't commit on \`${branch}\`. Create a ${PREFIXES} branch from origin/main first.`);
     }
-    if (git('push').test(command)) {
-      const target = pushTargets(command, branch).find(isProtected);
+    if (sub === 'push') {
+      const target = pushTargets(words, branch).find(isProtected);
       if (target) return deny(`Don't push to \`${target}\`. Push a ${PREFIXES} branch and open a PR.`);
     }
-    if (git('merge').test(command) && branch === 'main') {
-      return deny('Never merge into main locally; main changes only through merged PRs.');
+    if (sub === 'merge' && branch === 'main' && !words.includes('--ff-only')) {
+      return deny('Never merge into main locally; main changes only through merged PRs. (`git merge --ff-only` to catch up is fine.)');
     }
-    return null;
   }
+  return null;
+}
+
+export function check(input, currentBranch, isBranch = () => false) {
+  const tool = input.tool_name ?? '';
+  const args = input.tool_input ?? {};
+
+  if (tool === 'Bash') return checkShell(String(args.command ?? ''), currentBranch, isBranch);
 
   if (/^mcp__github__(push_files|create_or_update_file|delete_file)$/.test(tool)) {
     if (isProtected(String(args.branch ?? ''))) {
@@ -90,7 +148,16 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
         return '';
       }
     };
-    const result = check(input, currentBranch);
+    const isBranch = (name) =>
+      ['refs/heads/', 'refs/remotes/origin/'].some((prefix) => {
+        try {
+          execFileSync('git', ['show-ref', '--verify', '--quiet', `${prefix}${name}`], { cwd: input.cwd || root });
+          return true;
+        } catch {
+          return false;
+        }
+      });
+    const result = check(input, currentBranch, isBranch);
     if (!result) return;
     process.stdout.write(
       JSON.stringify({

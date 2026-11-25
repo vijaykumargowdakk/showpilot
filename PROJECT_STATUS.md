@@ -1,6 +1,6 @@
 # Showpilot: project status
 
-*Last updated 2026-11-24.*
+*Last updated 2026-11-25.*
 
 ## Read first
 - This file for status
@@ -39,9 +39,6 @@ node bin/showpilot.mjs record tour --project examples/hello   # then: render tou
 - Recording, rendering and the voice haven't been tested on macOS (Apple Silicon) (#4).
 - `showpilot dictate --record` hasn't been tested with live speech; only recorded files and microphone detection
   have.
-- The guard hook judges a compound shell command by the branch it starts on, so `git switch <branch> && git merge …`
-  run from `main` is blocked; run the switch on its own first. It also blocks `git merge --ff-only` on `main`; update
-  `main` with `git pull --ff-only origin main` instead.
 
 ## Action items for the owner
 - Hide the `0.0.0-stage` version: `npm deprecate showpilot@0.0.0-stage "Not a release"` (needs your npm login).
