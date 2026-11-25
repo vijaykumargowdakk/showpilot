@@ -79,3 +79,35 @@ describe('guard: GitHub writes', () => {
     expect(check({ tool_name: 'Read', tool_input: {} }, () => 'main')).toBeNull();
   });
 });
+
+describe('guard: compound commands', () => {
+  const branches = new Set(['feat/x', 'main']);
+  const withBranches = (command: string, branch: string) =>
+    check({ tool_name: 'Bash', tool_input: { command } }, () => branch, (name: string) => branches.has(name));
+
+  it('judges a merge by the branch an earlier switch moved to', () => {
+    expect(bash('git switch feat/x && git merge origin/main', 'main')).toBeNull();
+    expect(bash('git switch main && git merge feat/x', 'feat/x')?.decision).toBe('deny');
+  });
+
+  it('allows catching main up with a fast-forward', () => {
+    expect(bash('git merge --ff-only origin/main', 'main')).toBeNull();
+    expect(bash('git fetch origin main && git merge --ff-only origin/main', 'main')).toBeNull();
+  });
+
+  it('follows git checkout only when it names a branch, not a file', () => {
+    expect(withBranches('git checkout feat/x && git commit -m "x"', 'main')).toBeNull();
+    expect(withBranches('git checkout README.md && git commit -m "x"', 'main')?.decision).toBe('deny');
+    expect(withBranches('git checkout -b fix/y && git commit -m "x"', 'main')).toBeNull();
+  });
+
+  it('judges a push by the branch it runs on', () => {
+    expect(bash('git switch feat/x && git push -u origin feat/x', 'main')).toBeNull();
+    expect(bash('git switch feat/x && git push', 'main')).toBeNull();
+    expect(bash('git switch main && git push', 'feat/x')?.decision).toBe('deny');
+  });
+
+  it("doesn't read git commands out of a commit message", () => {
+    expect(bash('git commit -m "Docs\n\ngit push origin main is not allowed\ngit merge feat/y"', 'feat/x')).toBeNull();
+  });
+});
