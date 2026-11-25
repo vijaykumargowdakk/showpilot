@@ -71,3 +71,12 @@ folder and the cut passed as props. Studio serves the public folder where it is,
 render bundles need (they copy the public folder) isn't needed. Studio is an interactive window that stays open, so it
 holds no stage lock: a lock would block every recording and render for as long as it is open. Maintainer's input:
 picked issue #5 next.
+
+**2026-11-24: The launcher stops the command's whole process tree, and holds the lock until it has exited.** Ctrl+C in a
+terminal reaches every process in the group, but a signal to the launcher alone (an IDE's stop button, `kill`) didn't
+reach the command, so it kept running and the lock, which names the launcher's pid, looked stale. The launcher now runs
+the command with `spawn` and, on SIGINT, SIGTERM or SIGHUP, signals the command and every process below it (found with
+`ps` before anything is signalled, since orphans get re-parented; `taskkill /T` on Windows), kills what is left after a
+grace period, and releases the lock only after the command has exited. Starting the command in its own process group
+would have made the tree easy to signal, but it would also take the command out of the terminal's foreground, and the
+guided start's questions need the keyboard. Maintainer's input: asked for #22 to be fixed.
