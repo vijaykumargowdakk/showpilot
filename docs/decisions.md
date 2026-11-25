@@ -80,3 +80,9 @@ the command with `spawn` and, on SIGINT, SIGTERM or SIGHUP, signals the command 
 grace period, and releases the lock only after the command has exited. Starting the command in its own process group
 would have made the tree easy to signal, but it would also take the command out of the terminal's foreground, and the
 guided start's questions need the keyboard. Maintainer's input: asked for #22 to be fixed.
+
+**2026-11-25: Every text file is LF, enforced by `.gitattributes`.** The repository had grown a mix of CRLF, LF and
+mixed files, so editors normalising a file turned small edits into whole-file rewrites, and a CRLF after the CLI's
+shebang (`node\r`) would break the installed `showpilot` command on macOS and Linux while CI, which runs
+`node bin/showpilot.mjs`, stayed green. `* text=auto eol=lf` makes git store and check out LF on every OS, and a test
+checks the shebang's bytes. Maintainer's input: asked for the issues found in review (#24) to be fixed.
