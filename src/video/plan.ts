@@ -132,7 +132,7 @@ function phrasesOf(captions: Caption[], offset: number, duration: number) {
 function loadTimeline(cut: Cut, ci: number, out: string) {
   const dir = path.join(out, cut.id, `ch${String(ci + 1).padStart(2, '0')}`);
   const file = path.join(dir, 'timeline.json');
-  if (!existsSync(file)) throw new Error(`Chapter ${ci + 1} (${cut.chapters[ci].title}) is not recorded yet; run npm run record -- ${cut.id}`);
+  if (!existsSync(file)) throw new Error(`Chapter ${ci + 1} (${cut.chapters[ci].title}) is not recorded yet; run showpilot record ${cut.id}`);
   return { tl: JSON.parse(readFileSync(file, 'utf8')) as Timeline, frames: path.relative(out, path.join(dir, 'frames')).replaceAll('\\', '/') };
 }
 
@@ -145,7 +145,7 @@ function sceneChapter(cut: Cut, ci: number, voice: Voice, out: string): ChapterP
   let t = SCENE.lead;
   chapter.beats.forEach((b, bi) => {
     const v = voice[beatId(ci, bi)];
-    if (!v) throw new Error(`No narration for ${beatId(ci, bi)}; run npm run voice -- ${cut.id}`);
+    if (!v) throw new Error(`No narration for ${beatId(ci, bi)}; run showpilot voice ${cut.id}`);
     if (v.file) audio.push({ f: Math.round(t * FPS), src: path.relative(out, v.file).replaceAll('\\', '/'), d: v.duration });
     lines.push({ f: Math.round(t * FPS), text: cleanText(b.say ?? '') });
     const p = phrasesOf(v.captions, t, t + v.duration + 1);

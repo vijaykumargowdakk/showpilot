@@ -60,6 +60,17 @@
             "statusMessage": "Regenerating FILEMAP.md"
           }
         ]
+      },
+      {
+        "matcher": "mcp__github__create_pull_request",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pr-footer.mjs\"",
+            "shell": "bash",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "Stop": [
