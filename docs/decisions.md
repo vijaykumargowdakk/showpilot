@@ -86,3 +86,10 @@ mixed files, so editors normalising a file turned small edits into whole-file re
 shebang (`node\r`) would break the installed `showpilot` command on macOS and Linux while CI, which runs
 `node bin/showpilot.mjs`, stayed green. `* text=auto eol=lf` makes git store and check out LF on every OS, and a test
 checks the shebang's bytes. Maintainer's input: asked for the issues found in review (#24) to be fixed.
+
+**2026-11-26: 4K is a recording setting, not only a render flag.** `render --4k` rendered at scale 2 from a 1×
+capture, which only scales text up. `size: '4k'` makes `record` capture at device scale factor 2 (the page keeps its
+1920×1080 layout, so takes look the same) and `render` output 3840×2160, and the recorded scale is kept in each
+chapter's timeline so `render` can say when a chapter needs recording again. Vertical 9:16, the other half of #2, is
+left for a decision on layout: record the app at a portrait viewport (its mobile layout) or crop a desktop recording.
+Maintainer's input: asked for the open issues to be completed.

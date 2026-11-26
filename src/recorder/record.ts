@@ -28,7 +28,8 @@ async function recordChapter(config: Config, appUrl: string, cut: Cut, index: nu
   mkdirSync(framesDir, { recursive: true });
   console.log(`\n● Chapter ${index + 1}: ${chapter.title}`);
 
-  const { width, height, scale } = CAPTURE;
+  const { width, height } = CAPTURE;
+  const scale = config.size === '4k' ? 2 : CAPTURE.scale;
   // Density is forced at launch: with Playwright's deviceScaleFactor the screencast still sends 1× frames.
   const browser = await chromium.launch({ headless: true, args: [`--force-device-scale-factor=${scale}`, `--window-size=${width},${height}`] });
   const context = await browser.newContext({ viewport: null, serviceWorkers: chapter.offline ? 'allow' : 'block', colorScheme: config.app.colorScheme ?? 'light' });

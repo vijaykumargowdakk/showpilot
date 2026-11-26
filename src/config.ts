@@ -44,6 +44,11 @@ export type Config = {
    * loops if shorter than the video, fades in and out, and dips while the narrator speaks. `volume` shifts it in dB.
    */
   music?: string | { file: string; volume?: number };
+  /**
+   * '1080p' (default) or '4k'. 4K records the app at twice the pixel density and renders 3840×2160, so text stays sharp
+   * (record again after changing it).
+   */
+  size?: '1080p' | '4k';
 };
 
 export type Music = { file: string; volume: number };

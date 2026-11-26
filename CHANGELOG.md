@@ -5,6 +5,7 @@ project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- 4K: `size: '4k'` in the config records the app at twice the pixel density and renders 3840×2160, so text stays sharp. `render --4k` on a 1080p recording now says its text is only scaled up.
 - `showpilot studio` plays the background music, dipping and fading on the same curve as the render.
 - `showpilot studio` picks up edits: saving the cut or the config while Studio is open writes the plan again and reloads the page, so scene words, holds and branding can be tuned without a restart.
 - Fixed: two errors (a chapter not recorded yet, a line with no narration) told you to run `npm run record` / `npm run voice`, which only exist in Showpilot's own repository; they now say `showpilot record <cut>` / `showpilot voice <cut>`.
