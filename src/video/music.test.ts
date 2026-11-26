@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ALONE, BED, BRIDGE, DUCK, duckExpr, mergeSpans, musicChain, narrationSpans } from './music';
+import { ALONE, BED, BRIDGE, DUCK, duckExpr, duckGain, FADE, fadeGain, mergeSpans, musicChain, narrationSpans } from './music';
 import type { RenderPlan } from './plan';
 
 // Evaluates an ffmpeg volume expression the way ffmpeg does, for the functions duckExpr uses.
@@ -65,5 +65,23 @@ describe('the music filter chain', () => {
     expect(chain.startsWith('[2:a]atrim=0:40.000,')).toBe(true);
     expect(chain).toContain('afade=t=out:st=37.000:d=3.000[music]');
     expect(musicChain(1, 6, [])).toContain('afade=t=out:st=4.000:d=2.000');
+  });
+});
+
+describe('the same curve for previews', () => {
+  const spans = [{ start: 0.2, end: 3 }, { start: 3.8, end: 6 }, { start: 12, end: 14.5 }];
+
+  it('matches the ffmpeg expression at every point', () => {
+    const expr = duckExpr(spans);
+    for (let t = 0; t < 20; t += 0.05) expect(duckGain(spans, t)).toBeCloseTo(gain(expr, t), 3);
+    expect(duckGain([], 5)).toBe(1);
+  });
+
+  it('fades in and out like the mix', () => {
+    expect(fadeGain(60, 0)).toBe(0);
+    expect(fadeGain(60, FADE.in / 2)).toBeCloseTo(0.5, 5);
+    expect(fadeGain(60, 30)).toBe(1);
+    expect(fadeGain(60, 60 - FADE.out / 2)).toBeCloseTo(0.5, 5);
+    expect(fadeGain(60, 60)).toBe(0);
   });
 });

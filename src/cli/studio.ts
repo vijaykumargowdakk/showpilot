@@ -2,21 +2,34 @@
 // Opens a recorded cut in Remotion Studio: play it, scrub it and step through frames without rendering. The render
 // plan is written first, as `render` does, and the project's out/ folder is served as Studio's public folder where it
 // is (Studio doesn't copy it, unlike a render bundle). While Studio runs, saving the cut or the config writes the plan
-// again and the Studio page reloads with it. Studio shows the picture and the narration; music is mixed in only by
-// `showpilot render`.
+// again and the Studio page reloads with it. The config's music plays too, dipping on the render's curve; its level is
+// approximate, since the browser can't measure the track's loudness as the render does.
 import { spawn } from 'node:child_process';
-import { readFileSync, watch } from 'node:fs';
+import { copyFileSync, readFileSync, watch } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { loadConfig, loadCut } from '../config';
+import { loadConfig, loadCut, musicOf, type Config } from '../config';
 import { OUT, PKG, PROJECT } from '../paths.mjs';
+import type { Cut } from '../recorder/script';
 import { writePlan } from '../video/plan';
 import { brandFor } from './brand';
 
 const args = process.argv.slice(2);
 const id = args.find((a, i) => !a.startsWith('--') && args[i - 1] !== '--port');
 const cut = await loadCut(id);
-console.log(`planned ${path.relative(OUT, writePlan(cut, brandFor(await loadConfig())))}`);
+
+// Studio previews the music in the browser, so a copy goes next to the plan, where the page can load it.
+const plan = (c: Cut, config: Config) => {
+  const music = musicOf(config);
+  let preview;
+  if (music) {
+    const src = `${c.id}/studio-music${path.extname(music.file)}`;
+    copyFileSync(music.file, path.join(OUT, src));
+    preview = { src, volume: music.volume };
+  }
+  return writePlan(c, brandFor(config), preview);
+};
+console.log(`planned ${path.relative(OUT, plan(cut, await loadConfig()))}`);
 
 const pkg = createRequire(import.meta.url).resolve('@remotion/cli/package.json');
 const cli = path.join(path.dirname(pkg), JSON.parse(readFileSync(pkg, 'utf8')).bin.remotion);
@@ -33,7 +46,7 @@ let timer: NodeJS.Timeout | undefined;
 const replan = async () => {
   try {
     const [fresh, config] = await Promise.all([loadCut(id, true), loadConfig(true)]);
-    writePlan(fresh, brandFor(config));
+    plan(fresh, config);
     console.log(`re-planned ${cut.id} after your edit; Studio reloads it`);
   } catch (e) {
     // A half-typed edit doesn't stop Studio; the next save tries again.

@@ -49,7 +49,17 @@ export type ChapterPlan = {
 };
 /** What the renderer needs from the config: the name and colours, the logo (copied to out/_brand) and links. */
 export type Brand = Config['brand'] & { logoFile?: string; windowTitle?: string };
-export type RenderPlan = { cut: string; fps: number; frames: number; silent?: boolean; chapterTitles?: boolean; brand: Brand; chapters: ChapterPlan[] };
+export type RenderPlan = {
+  cut: string;
+  fps: number;
+  frames: number;
+  silent?: boolean;
+  chapterTitles?: boolean;
+  brand: Brand;
+  chapters: ChapterPlan[];
+  /** Only in plans written by `showpilot studio`: the music to preview in the browser (renders mix it with ffmpeg). */
+  music?: { src: string; volume: number };
+};
 
 const round = (v: number, d = 1) => Math.round(v * 10 ** d) / 10 ** d;
 
@@ -245,8 +255,8 @@ export function planCut(cut: Cut, brand: Brand): RenderPlan {
   return { cut: cut.id, fps: FPS, frames: chapters.reduce((n, c) => n + c.frames, 0), silent: cut.silent, chapterTitles: cut.chapterTitles, brand, chapters };
 }
 
-export function writePlan(cut: Cut, brand: Brand): string {
+export function writePlan(cut: Cut, brand: Brand, music?: RenderPlan['music']): string {
   const file = path.join(OUT, cut.id, 'render.json');
-  writeFileSync(file, JSON.stringify(planCut(cut, brand)));
+  writeFileSync(file, JSON.stringify({ ...planCut(cut, brand), music }));
   return file;
 }
