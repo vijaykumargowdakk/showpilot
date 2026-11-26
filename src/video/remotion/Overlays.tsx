@@ -2,6 +2,7 @@
 // (they stay put on screen).
 import { interpolate, spring, useVideoConfig } from 'remotion';
 import type { ChapterPlan } from '../plan';
+import { isTall, useGeometry } from './layout';
 import { C, FONT } from './theme';
 
 export function Cursor({ plan, frame }: { plan: ChapterPlan; frame: number }) {
@@ -122,6 +123,7 @@ export function Keycaps({ plan, frame }: { plan: ChapterPlan; frame: number }) {
 }
 
 export function Captions({ plan, frame }: { plan: ChapterPlan; frame: number }) {
+  const tall = isTall(useGeometry());
   const p = plan.phrases.find((p) => frame >= p.f && frame < p.to);
   if (!p) return null;
   const fade = Math.min(1, (frame - p.f) / 6, (p.to - frame) / 6);
@@ -129,7 +131,7 @@ export function Captions({ plan, frame }: { plan: ChapterPlan; frame: number }) 
     <div style={{ position: 'absolute', bottom: 46, width: '100%', display: 'flex', justifyContent: 'center', opacity: fade }}>
       <div
         style={{
-          maxWidth: 1400,
+          maxWidth: tall ? 960 : 1400,
           padding: '14px 30px',
           borderRadius: 18,
           background: 'rgba(5, 11, 20, 0.88)',

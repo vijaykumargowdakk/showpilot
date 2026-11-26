@@ -1,5 +1,5 @@
 import { Composition, getRemotionEnvironment, staticFile, watchStaticFile } from 'remotion';
-import { FPS, OUT } from '../geometry';
+import { FPS, geometryFor, LANDSCAPE } from '../geometry';
 import type { RenderPlan } from '../plan';
 import { CutVideo } from './CutVideo';
 import { THUMB, Thumbnail, type ThumbnailProps } from './Thumbnail';
@@ -24,15 +24,16 @@ export function Root() {
       <Composition
         id="Cut"
         component={CutVideo}
-        width={OUT.w}
-        height={OUT.h}
+        width={LANDSCAPE.OUT.w}
+        height={LANDSCAPE.OUT.h}
         fps={FPS}
         durationInFrames={FPS}
         defaultProps={{ cut: '' } as CutProps}
         calculateMetadata={async ({ props }) => {
           reloadOnChange(`${props.cut}/render.json`);
           const plan = (await (await fetch(staticFile(`${props.cut}/render.json`))).json()) as RenderPlan;
-          return { durationInFrames: plan.frames, props: { ...props, plan } };
+          const { OUT } = geometryFor(plan.layout);
+          return { durationInFrames: plan.frames, width: OUT.w, height: OUT.h, props: { ...props, plan } };
         }}
       />
     </>

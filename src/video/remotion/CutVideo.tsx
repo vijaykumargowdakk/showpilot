@@ -1,10 +1,11 @@
 import { createContext, useContext, type CSSProperties } from 'react';
 import { AbsoluteFill, getRemotionEnvironment, Html5Audio, Img, interpolate, Sequence, Series, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
-import { K, OUT, toStage, VIEW, WIN, WIN_X, WIN_Y } from '../geometry';
+import { geometryFor, toStage } from '../geometry';
 import { ALONE, BED, duckGain, fadeGain, narrationSpans } from '../music';
 import type { Brand, ChapterPlan, RenderPlan } from '../plan';
 import { Background } from './Background';
 import { Callouts, Captions, Cursor, Keycaps, Ripples } from './Overlays';
+import { GeometryContext, isTall, useGeometry } from './layout';
 import { BadgesScene, CtaScene, KineticScene, SpeedBadge } from './Scenes';
 import type { CutProps } from './Root';
 import { C, FONT, themeVars } from './theme';
@@ -13,6 +14,17 @@ const BrandContext = createContext<Brand>({ name: '' });
 
 function TitleBar({ title }: { title?: string }) {
   const brand = useContext(BrandContext);
+  const { WIN, layout } = useGeometry();
+  if (layout === 'vertical-phone') {
+    // A phone's status bar: the time, the page's title, and the usual icons.
+    return (
+      <div style={{ height: WIN.titlebar, background: C.titlebar, display: 'flex', alignItems: 'center', padding: '0 28px', color: C.muted, font: `600 18px ${FONT}` }}>
+        <span style={{ width: 90 }}>9:41</span>
+        <span style={{ flex: 1, textAlign: 'center', fontWeight: 500 }}>{title ?? brand.windowTitle ?? brand.name}</span>
+        <span style={{ width: 90, textAlign: 'right', letterSpacing: 2 }}>▂▄▆ ▮</span>
+      </div>
+    );
+  }
   return (
     <div style={{ height: WIN.titlebar, background: C.titlebar, display: 'flex', alignItems: 'center', padding: '0 16px', borderBottom: `1px solid ${C.border}` }}>
       {['#ff5f57', '#febc2e', '#28c840'].map((c) => (
@@ -49,6 +61,7 @@ function ChapterTitle({ number, title, frame }: { number: number; title: string;
 
 /** The Mac-style window with a recorded screenshot, and the cursor and click ripples drawn over it. */
 function AppWindow({ plan, frame, style }: { plan: ChapterPlan; frame: number; style?: CSSProperties }) {
+  const { WIN, VIEW, K } = useGeometry();
   return (
     <div style={{ width: WIN.w, height: WIN.h + WIN.titlebar, overflow: 'hidden', background: '#fff', ...style }}>
       <TitleBar title={plan.window} />
@@ -72,6 +85,19 @@ function SideWindow({ plan }: { plan: ChapterPlan }) {
   const enter = spring({ frame, fps, config: { damping: 18, stiffness: 70 } });
   const out = interpolate(frame, [plan.frames - 14, plan.frames], [1, 0], { extrapolateLeft: 'clamp' });
   const float = Math.sin(frame / 95) * 8;
+  const g = useGeometry();
+  const { OUT, WIN } = g;
+  if (isTall(g)) {
+    // Below the words: the app rises in, tilted back a little.
+    const scale = 0.62;
+    return (
+      <AbsoluteFill style={{ perspective: 2400, opacity: out }}>
+        <div style={{ position: 'absolute', left: (OUT.w - WIN.w * scale) / 2, top: OUT.h * 0.4 + float, transformOrigin: '50% 0', transform: `translateY(${(1 - enter) * 700}px) rotateX(${10 + 14 * (1 - enter)}deg) scale(${scale})` }}>
+          <AppWindow plan={plan} frame={frame} style={{ borderRadius: 44, boxShadow: `0 50px 140px rgba(0,0,0,0.6), 0 0 0 10px #0b1118, 0 0 0 11px ${C.border}` }} />
+        </div>
+      </AbsoluteFill>
+    );
+  }
   return (
     <AbsoluteFill style={{ perspective: 2400, opacity: out }}>
       <div style={{ position: 'absolute', left: 790, top: (OUT.h - WIN.h - WIN.titlebar) / 2 + float, transformOrigin: '0 50%', transform: `translateX(${(1 - enter) * 700}px) rotateY(${12 + 14 * (1 - enter)}deg) rotateX(2deg) scale(0.78)` }}>
@@ -86,6 +112,7 @@ function Backdrop({ plan }: { plan: ChapterPlan }) {
   const frame = useCurrentFrame();
   const fade = interpolate(frame, [0, 20, plan.frames - 20, plan.frames], [0, 1, 1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
   const zoom = 1.22 + 0.08 * (frame / plan.frames);
+  const { OUT } = useGeometry();
   return (
     <AbsoluteFill style={{ opacity: fade }}>
       <div style={{ position: 'absolute', left: OUT.w / 2, top: OUT.h / 2, transform: `translate(-50%, -50%) scale(${zoom})`, filter: 'blur(4px) brightness(0.62) saturate(0.9)' }}>
@@ -120,9 +147,12 @@ function CaptureChapter({ plan, clean }: { plan: ChapterPlan; clean: boolean }) 
   const fadeIn = interpolate(frame, [0, 12], [0, 1], { extrapolateRight: 'clamp' });
   const i = Math.min(frame, plan.frames - 1) * 3;
   const [s, x, y] = plan.cam.slice(i, i + 3);
-  const p = toStage(x, y);
-  // Shadow and corner radius ease off as the window fills the frame.
+  const g = useGeometry();
+  const { OUT, WIN_X, WIN_Y } = g;
+  const p = toStage(g, x, y);
+  // Shadow and corner radius ease off as the window fills the frame. A phone keeps its rounded corners and bezel.
   const filled = Math.min(1, Math.max(0, (s - 1) / 0.25));
+  const phone = g.layout === 'vertical-phone';
   return (
     <AbsoluteFill style={{ opacity: fadeIn }}>
       <AbsoluteFill style={{ transform: `translate(${OUT.w / 2}px, ${OUT.h / 2}px) scale(${s}) translate(${-p.x}px, ${-p.y}px)`, transformOrigin: '0 0' }}>
@@ -133,8 +163,8 @@ function CaptureChapter({ plan, clean }: { plan: ChapterPlan; clean: boolean }) 
             position: 'absolute',
             left: WIN_X,
             top: WIN_Y,
-            borderRadius: 14 * (1 - filled * 0.6),
-            boxShadow: `0 ${40 * (1 - filled)}px ${120 * (1 - filled)}px rgba(0,0,0,0.55), 0 0 0 1px ${C.border}`,
+            borderRadius: phone ? 44 : 14 * (1 - filled * 0.6),
+            boxShadow: `0 ${40 * (1 - filled)}px ${120 * (1 - filled)}px rgba(0,0,0,0.55), ${phone ? '0 0 0 10px #0b1118, ' : ''}0 0 0 ${phone ? 11 : 1}px ${C.border}`,
           }}
         />
       </AbsoluteFill>
@@ -169,6 +199,7 @@ export function CutVideo({ plan, clean = false }: CutProps) {
   if (!plan) return null;
   return (
     <BrandContext.Provider value={plan.brand}>
+    <GeometryContext.Provider value={geometryFor(plan.layout)}>
     <AbsoluteFill style={{ ...themeVars(plan.brand.accent), background: C.bg0 }}>
       <Background />
       <MusicPreview plan={plan} />
@@ -180,6 +211,7 @@ export function CutVideo({ plan, clean = false }: CutProps) {
         ))}
       </Series>
     </AbsoluteFill>
+    </GeometryContext.Provider>
     </BrandContext.Provider>
   );
 }

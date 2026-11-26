@@ -26,8 +26,8 @@ const cut = await loadCut(args.find((a, i) => !a.startsWith('--') && args[i - 1]
 const clean = flag('--clean') || !!cut.silent;
 const brand = brandFor(config);
 const music = flag('--clean') ? undefined : musicOf(config);
-console.log(`planned ${path.relative(OUT, writePlan(cut, brand))}`);
-const plan = planCut(cut, brand);
+console.log(`planned ${path.relative(OUT, writePlan(cut, brand, config.layout))}`);
+const plan = planCut(cut, brand, config.layout);
 
 // 4K wants a recording made at twice the density; a 1080p recording rendered at 4K is only scaled up.
 const fourK = config.size === '4k';
