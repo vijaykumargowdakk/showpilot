@@ -69,10 +69,16 @@ export function shots(events: TimelineEvent[], g: Geometry = LANDSCAPE): Shot[] 
   return out;
 }
 
-/** Where the camera wants to be at time t: the latest shot that has started and not ended, else wide. */
+/**
+ * Where the camera wants to be at time t: the latest shot that has started and not ended, else wide. With `holdX` the
+ * wide shot stays across from the last shot, so a frame narrower than the window keeps the action in view.
+ */
 export function targetAt(list: Shot[], t: number, g: Geometry = LANDSCAPE): Cam {
   let cam = g.WIDE;
-  for (const s of list) if (s.from <= t && t < s.to) cam = s.cam;
+  for (const s of list) {
+    if (s.from > t) break;
+    cam = t < s.to ? s.cam : g.holdX ? { ...g.WIDE, x: s.cam.x } : g.WIDE;
+  }
   return cam;
 }
 

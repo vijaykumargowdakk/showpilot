@@ -52,7 +52,9 @@ export type Config = {
   size?: '1080p' | '4k';
   /**
    * 'landscape' (default): a 1920×1080 video of the app at desktop size. 'vertical-phone': a 1080×1920 video (Shorts,
-   * Reels) of the app at phone size, so it shows its mobile layout, in a phone-shaped frame. Record again after changing it.
+   * Reels) of the app at phone size, so it shows its mobile layout, in a phone-shaped frame. 'vertical-desktop': a
+   * 1080×1920 video of the app at desktop size, with the camera following the action across it. Record again after
+   * changing it.
    */
   layout?: Layout;
 };
