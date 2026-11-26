@@ -58,8 +58,8 @@ function geometry(layout: Layout, OUT: Geometry['OUT'], VIEW: Geometry['VIEW'], 
 const GEOMETRY: Record<Layout, Geometry> = {
   landscape: geometry('landscape', { w: 1920, h: 1080 }, { w: 1920, h: 1080 }, 1, 1600, 40, null, { min: 1.4, max: 1.8, focus: 1.6 }),
   // A large phone's width; the height leaves room under the frame for captions. Captured at 3× so the window,
-  // drawn at 2×, stays sharp when the camera moves in a little.
-  'vertical-phone': geometry('vertical-phone', { w: 1080, h: 1920 }, { w: 430, h: 770 }, 3, 860, 44, 110, { min: 1.15, max: 1.4, focus: 1.3 }),
+  // drawn at 2×, stays sharp when the camera moves in. The phone already fills the frame's width, so zooms are small.
+  'vertical-phone': geometry('vertical-phone', { w: 1080, h: 1920 }, { w: 430, h: 770 }, 3, 860, 44, 110, { min: 1.1, max: 1.3, focus: 1.2 }),
 };
 
 export const geometryFor = (layout: Layout = 'landscape'): Geometry => GEOMETRY[layout];

@@ -92,7 +92,7 @@ function SideWindow({ plan }: { plan: ChapterPlan }) {
     const scale = 0.62;
     return (
       <AbsoluteFill style={{ perspective: 2400, opacity: out }}>
-        <div style={{ position: 'absolute', left: (OUT.w - WIN.w * scale) / 2, top: OUT.h * 0.4 + float, transformOrigin: '50% 0', transform: `translateY(${(1 - enter) * 700}px) rotateX(${10 + 14 * (1 - enter)}deg) scale(${scale})` }}>
+        <div style={{ position: 'absolute', left: (OUT.w - WIN.w) / 2, top: OUT.h * 0.4 + float, transformOrigin: '50% 0', transform: `translateY(${(1 - enter) * 700}px) rotateX(${10 + 14 * (1 - enter)}deg) scale(${scale})` }}>
           <AppWindow plan={plan} frame={frame} style={{ borderRadius: 44, boxShadow: `0 50px 140px rgba(0,0,0,0.6), 0 0 0 10px #0b1118, 0 0 0 11px ${C.border}` }} />
         </div>
       </AbsoluteFill>

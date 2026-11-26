@@ -36,5 +36,5 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const { OUT } = await import('../paths.mjs');
   const config = await loadConfig();
   const cut = await loadCut(process.argv[2]);
-  for (const f of writeSubtitles(path.join(OUT, cut.id), planCut(cut, config.brand), cut.title)) console.log(`→ ${f}`);
+  for (const f of writeSubtitles(path.join(OUT, cut.id), planCut(cut, config.brand, config.layout), cut.title)) console.log(`→ ${f}`);
 }

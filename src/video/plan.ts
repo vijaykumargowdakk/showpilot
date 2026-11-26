@@ -11,7 +11,7 @@ import { FPS, geometryFor, type Geometry, type Layout } from './geometry';
 import { cleanText, estimateCaptions, type Caption } from './subtitles';
 
 type Voice = Record<string, { file: string; duration: number; captions: Caption[] }>;
-type Timeline = { title: string; duration: number; shots: { t: number; file: string }[]; events: (TimelineEvent & { id?: string; keys?: string[]; text?: string })[] };
+type Timeline = { title: string; duration: number; viewport?: { width: number; height: number }; shots: { t: number; file: string }[]; events: (TimelineEvent & { id?: string; keys?: string[]; text?: string })[] };
 
 export type CursorKind = 0 | 1; // 0 arrow, 1 grab
 export type ChapterPlan = {
@@ -141,14 +141,20 @@ function phrasesOf(captions: Caption[], offset: number, duration: number) {
   return phrases;
 }
 
-function loadTimeline(cut: Cut, ci: number, out: string) {
+function loadTimeline(cut: Cut, ci: number, out: string, g: Geometry) {
   const dir = path.join(out, cut.id, `ch${String(ci + 1).padStart(2, '0')}`);
   const file = path.join(dir, 'timeline.json');
   if (!existsSync(file)) throw new Error(`Chapter ${ci + 1} (${cut.chapters[ci].title}) is not recorded yet; run showpilot record ${cut.id}`);
-  return { tl: JSON.parse(readFileSync(file, 'utf8')) as Timeline, frames: path.relative(out, path.join(dir, 'frames')).replaceAll('\\', '/') };
+  const tl = JSON.parse(readFileSync(file, 'utf8')) as Timeline;
+  // The camera and the drawing assume the layout's viewport, so a take recorded for another layout can't be used.
+  const vp = tl.viewport;
+  if (vp && (vp.width !== g.VIEW.w || vp.height !== g.VIEW.h)) {
+    throw new Error(`Chapter ${ci + 1} (${cut.chapters[ci].title}) was recorded at ${vp.width}×${vp.height}, not for the ${g.layout} layout (${g.VIEW.w}×${g.VIEW.h}); run showpilot record ${cut.id} again`);
+  }
+  return { tl, frames: path.relative(out, path.join(dir, 'frames')).replaceAll('\\', '/') };
 }
 
-function sceneChapter(cut: Cut, ci: number, voice: Voice, out: string): ChapterPlan {
+function sceneChapter(cut: Cut, ci: number, voice: Voice, out: string, g: Geometry): ChapterPlan {
   const chapter = cut.chapters[ci];
   const audio: ChapterPlan['audio'] = [];
   const phrases: ChapterPlan['phrases'] = [];
@@ -169,7 +175,7 @@ function sceneChapter(cut: Cut, ci: number, voice: Voice, out: string): ChapterP
   const plan: ChapterPlan = { title: chapter.title, kind: 'scene', scene: chapter.scene, props: chapter.props, words, dir: '', files: [], shot: [], frames, cam: [], cursor: [], ripples: [], keys: [], callouts: [], audio, phrases, lines };
   if (!chapter.broll) return plan;
   // B-roll is shown whole (no camera moves); the take runs at least as long as the scene, so it is cut to fit.
-  const { tl, frames: dir } = loadTimeline(cut, ci, out);
+  const { tl, frames: dir } = loadTimeline(cut, ci, out, g);
   return {
     ...plan,
     dir,
@@ -182,7 +188,7 @@ function sceneChapter(cut: Cut, ci: number, voice: Voice, out: string): ChapterP
 
 function captureChapter(cut: Cut, ci: number, voice: Voice, out: string, g: Geometry): ChapterPlan {
   const chapter = cut.chapters[ci];
-  const { tl, frames: dir } = loadTimeline(cut, ci, out);
+  const { tl, frames: dir } = loadTimeline(cut, ci, out, g);
   const speed = chapter.speed ?? 1;
   const real = Math.ceil(tl.duration * FPS);
   const frames = Math.ceil(real / speed);
@@ -253,7 +259,7 @@ export function planCut(cut: Cut, brand: Brand, layout: Layout = 'landscape'): R
   const out = OUT;
   const voiceFile = path.join(out, cut.id, 'voice', 'voice.json');
   const voice: Voice = cut.silent ? silentVoice(cut) : existsSync(voiceFile) ? JSON.parse(readFileSync(voiceFile, 'utf8')) : {};
-  const chapters = cut.chapters.map((c, ci) => (c.kind === 'scene' ? sceneChapter(cut, ci, voice, out) : captureChapter(cut, ci, voice, out, g)));
+  const chapters = cut.chapters.map((c, ci) => (c.kind === 'scene' ? sceneChapter(cut, ci, voice, out, g) : captureChapter(cut, ci, voice, out, g)));
   if (cut.chapterTitles) chapters.filter((c) => c.kind === 'capture').forEach((c, i) => (c.number = i + 1));
   return { cut: cut.id, fps: FPS, frames: chapters.reduce((n, c) => n + c.frames, 0), silent: cut.silent, chapterTitles: cut.chapterTitles, layout, brand, chapters };
 }
