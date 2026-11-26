@@ -56,7 +56,8 @@ Check a layout before a long render with `npx showpilot render tour --still 120,
 To watch the whole cut before rendering, `npx showpilot studio tour` opens it in
 [Remotion Studio](https://www.remotion.dev/docs/studio) in your browser, straight from the recording: play it, scrub
 the timeline and step frame by frame, with the camera, cursor, captions and narration as they will be rendered.
-Background music isn't in the preview (it is mixed in by `render`). Save the cut or `showpilot.config.ts` while
+The config's background music plays too, dipping under the narration as it will in the render (its level is
+approximate in the preview). Save the cut or `showpilot.config.ts` while
 Studio is open and the page reloads with the change (scene words, holds, the brand); new actions need a new
 `record`. `--port 3001` picks another port, `--no-open` doesn't open the browser. Studio isn't a heavy stage, so it
 can stay open while you record or render.

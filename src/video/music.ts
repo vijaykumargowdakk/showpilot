@@ -52,6 +52,20 @@ export function duckExpr(spans: Span[]): string {
   return `1-${dip}*${under.reduce((a, b) => `max(${a},${b})`)}`;
 }
 
+/** The dip's gain at time `t`, as a number: the same curve `duckExpr` gives ffmpeg, for previews in the browser. */
+export function duckGain(spans: Span[], t: number): number {
+  const clip = (x: number) => Math.min(1, Math.max(0, x));
+  const dip = 1 - 10 ** (DUCK.depth / 20);
+  const under = mergeSpans(spans).map(({ start, end }) => clip((t - (start - DUCK.attack)) / DUCK.attack) * clip((end + DUCK.release - t) / DUCK.release));
+  return 1 - dip * Math.max(0, ...under);
+}
+
+/** The fade-in and fade-out gain at time `t` in a video `seconds` long, as `musicChain` fades it. */
+export function fadeGain(seconds: number, t: number): number {
+  const out = Math.min(FADE.out, seconds / 3);
+  return Math.max(0, Math.min(1, t / FADE.in, (seconds - t) / out));
+}
+
 /**
  * Filter lines that turn audio input `input` (the music, looped) into `[music]`: `seconds` long, normalised to the
  * bed level (or to ALONE when nothing is spoken), dipping under `spans`, faded in and out. `volume` shifts it in dB.

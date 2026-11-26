@@ -1,7 +1,8 @@
 import { createContext, useContext, type CSSProperties } from 'react';
-import { AbsoluteFill, Html5Audio, Img, interpolate, Sequence, Series, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, getRemotionEnvironment, Html5Audio, Img, interpolate, Sequence, Series, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { K, OUT, toStage, VIEW, WIN, WIN_X, WIN_Y } from '../geometry';
-import type { Brand, ChapterPlan } from '../plan';
+import { ALONE, BED, duckGain, fadeGain, narrationSpans } from '../music';
+import type { Brand, ChapterPlan, RenderPlan } from '../plan';
 import { Background } from './Background';
 import { Callouts, Captions, Cursor, Keycaps, Ripples } from './Overlays';
 import { BadgesScene, CtaScene, KineticScene, SpeedBadge } from './Scenes';
@@ -146,12 +147,31 @@ function CaptureChapter({ plan, clean }: { plan: ChapterPlan; clean: boolean }) 
   );
 }
 
+/**
+ * The music in Studio only (renders mix it with ffmpeg): looped, dipping and fading on the same curve as the mix. The
+ * browser can't measure the track's loudness, so the level assumes a track mastered near the narration's.
+ */
+function MusicPreview({ plan }: { plan: RenderPlan }) {
+  if (!plan.music || !getRemotionEnvironment().isStudio) return null;
+  const spans = narrationSpans(plan);
+  const seconds = plan.frames / plan.fps;
+  const level = 10 ** (((spans.length ? BED - ALONE : 0) + plan.music.volume) / 20);
+  return (
+    <Html5Audio
+      src={staticFile(plan.music.src)}
+      loop
+      volume={(f) => Math.min(1, level * duckGain(spans, f / plan.fps) * fadeGain(seconds, f / plan.fps))}
+    />
+  );
+}
+
 export function CutVideo({ plan, clean = false }: CutProps) {
   if (!plan) return null;
   return (
     <BrandContext.Provider value={plan.brand}>
     <AbsoluteFill style={{ ...themeVars(plan.brand.accent), background: C.bg0 }}>
       <Background />
+      <MusicPreview plan={plan} />
       <Series>
         {plan.chapters.map((c, i) => (
           <Series.Sequence key={i} durationInFrames={c.frames}>
