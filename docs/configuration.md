@@ -21,6 +21,7 @@ export default defineConfig({
   voice: { mix: { am_fenrir: 0.7, am_eric: 0.3 }, speed: 0.92, energy: 1 },
   lexicon: 'lexicon.json',
   music: 'assets/track.mp3',      // or { file: 'assets/track.mp3', volume: -3 }
+  size: '4k',                     // or '1080p' (the default)
 });
 ```
 
@@ -36,7 +37,7 @@ export default defineConfig({
 | `colorScheme` | `'light'` (default) or `'dark'`, for apps that follow the system theme. |
 | `title` | The text in the window's title bar (default: `brand.name`). Useful when the video's brand isn't the app's name. |
 
-Recordings are 1920×1080 at a pixel density of 1, rendered at 1080p60.
+Recordings are 1920×1080 at a pixel density of 1, rendered at 1080p60, unless `size` is `'4k'`.
 
 ## `brand`
 
@@ -73,6 +74,16 @@ Showpilot doesn't come with any music: use a track you have the rights to.
 
 The level is measured from the track itself, so a quiet acoustic piece and a loud electronic one end up at the
 same loudness.
+
+## `size`
+
+`'1080p'` (the default) or `'4k'`. With `'4k'`, `record` captures the app at twice the pixel density (the page is
+still laid out at 1920×1080, so it looks the same, only sharper), and `render` makes a 3840×2160 video, stills
+included. Record again after changing it: `render` says so if a chapter was recorded at the old size. 4K renders
+take about four times as long.
+
+`render --4k` still makes a one-off `<cut>-4k.mp4` from a 1080p recording, but the picture is only scaled up, so text
+is soft; it says so when you use it.
 
 ## Environment variables
 

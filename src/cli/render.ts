@@ -3,10 +3,11 @@
 // as PNGs in out/<cut>/stills/ to check a layout. --clean renders <cut>-clean.mp4 with no captions and no audio (the
 // scenes' on-screen words stay); a silent cut always renders that way, as <cut>.mp4. Every video render also writes
 // the .srt, the timestamped script and the chapter list. With `music` in the config, it plays under the video (a
-// silent cut's only sound), dipping under the narration; --clean renders stay without it. Concurrency is half the
+// silent cut's only sound), dipping under the narration; --clean renders stay without it. With size: '4k' in the
+// config the video (and stills) are 3840×2160; --4k scales a 1080p recording up instead. Concurrency is half the
 // CPU threads (RENDER_CONCURRENCY overrides it) so the computer stays usable.
 import { renderMedia, renderStill, selectComposition } from '@remotion/renderer';
-import { mkdirSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { loadConfig, loadCut, musicOf } from '../config';
 import { OUT } from '../paths.mjs';
@@ -28,7 +29,23 @@ const music = flag('--clean') ? undefined : musicOf(config);
 console.log(`planned ${path.relative(OUT, writePlan(cut, brand))}`);
 const plan = planCut(cut, brand);
 
-const output = path.join(OUT, cut.id, `${cut.id}${flag('--4k') ? '-4k' : ''}${flag('--clean') ? '-clean' : ''}.mp4`);
+// 4K wants a recording made at twice the density; a 1080p recording rendered at 4K is only scaled up.
+const fourK = config.size === '4k';
+const scale = fourK || flag('--4k') ? 2 : 1;
+const recordedScales = readdirSync(path.join(OUT, cut.id))
+  .filter((d) => /^ch\d+$/.test(d))
+  .map((d) => path.join(OUT, cut.id, d, 'timeline.json'))
+  .filter(existsSync)
+  .map((f) => (JSON.parse(readFileSync(f, 'utf8')) as { scale?: number }).scale ?? 1);
+if (scale === 2 && recordedScales.some((s) => s < 2)) {
+  console.log(
+    fourK
+      ? 'Some chapters were recorded before size: \'4k\' was set, so their text is scaled up. Record again for sharp 4K.'
+      : '--4k scales a 1080p recording up, so text is soft. For sharp text, set size: \'4k\' in showpilot.config.ts and record again.',
+  );
+}
+
+const output = path.join(OUT, cut.id, `${cut.id}${flag('--4k') && !fourK ? '-4k' : ''}${flag('--clean') ? '-clean' : ''}.mp4`);
 // With music, the render goes to a hidden file first and the music is mixed from it into the output.
 const rendered = music ? path.join(path.dirname(output), `.${path.basename(output, '.mp4')}-unmixed.mp4`) : output;
 await withBundle(cut.id, async (serveUrl) => {
@@ -38,7 +55,7 @@ await withBundle(cut.id, async (serveUrl) => {
     mkdirSync(path.join(OUT, cut.id, 'stills'), { recursive: true });
     for (const frame of stills) {
       const file = path.join(OUT, cut.id, 'stills', `${frame}.png`);
-      await renderStill({ serveUrl, composition, inputProps, frame, output: file, chromiumOptions });
+      await renderStill({ serveUrl, composition, inputProps, frame, output: file, scale: fourK ? 2 : 1, chromiumOptions });
       console.log(`→ ${file}`);
     }
     return;
@@ -55,7 +72,7 @@ await withBundle(cut.id, async (serveUrl) => {
     muted: clean,
     outputLocation: rendered,
     concurrency: process.env.RENDER_CONCURRENCY ? Number(process.env.RENDER_CONCURRENCY) : '50%',
-    scale: flag('--4k') ? 2 : 1,
+    scale,
     chromiumOptions,
     onProgress: ({ progress, renderedFrames }) => {
       const pct = Math.floor(progress * 100);
