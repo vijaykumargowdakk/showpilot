@@ -32,7 +32,7 @@ node bin/showpilot.mjs record tour --project examples/hello   # then: render tou
 | M2 | Showcase | `examples/showcase`, README GIF, window titles | Done (PR #7) |
 | M3 | Guided videos | `showpilot new`, voice picking, ways to get a script | Done (PR #8) |
 | M4 | npm package | Publish `showpilot` (#6) | Done: on npm since 0.2.0; 0.3.0 published from CI with trusted publishing |
-| M5 | Roadmap | Video sizes (#2: 4K done with `size: '4k'`; vertical phone done with `layout: 'vertical-phone'`; vertical crop of a desktop recording next), background music (#3, done: `music` in the config), macOS testing (#4), `studio` live preview (#5, done: `showpilot studio`) | Each issue closed |
+| M5 | Roadmap | Video sizes (#2, done: `size: '4k'`, `layout: 'vertical-phone'`, `layout: 'vertical-desktop'`), background music (#3, done: `music` in the config), macOS testing (#4), `studio` live preview (#5, done: `showpilot studio`) | Each issue closed |
 
 ## Known issues
 - npm also lists a `0.0.0-stage` version of `showpilot`. It isn't the `latest` tag, so installs don't get it.

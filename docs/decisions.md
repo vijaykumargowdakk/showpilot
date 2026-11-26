@@ -101,3 +101,10 @@ landscape renders stay pixel-identical. `vertical-phone` (1080×1920) records th
 density, so apps show their mobile layout, drawn at 2× in a phone frame; zooms are smaller because the phone already
 fills the width. Each chapter's timeline keeps its viewport, and planning refuses a take recorded for another layout
 rather than drawing it wrongly. Maintainer's input: chose the phone layout first, then a crop of the desktop recording.
+
+**2026-11-26: The vertical desktop layout draws the window wider than the frame, and the camera holds its place.**
+Rather than cropping a finished landscape render, `vertical-desktop` is a layout like the others: the desktop recording
+(captured at 2×) is drawn at 1.25×, so a 1080-wide frame shows a readable slice about 860 app pixels across at full
+height, and the existing camera pans over the window and moves in on each action. Between actions the camera keeps the
+last action's position (`holdX`) instead of returning to the middle, which in a narrow frame would hide what just
+happened. Maintainer's input: asked for this after the phone layout, so both vertical styles exist.

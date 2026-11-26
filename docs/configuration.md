@@ -22,7 +22,7 @@ export default defineConfig({
   lexicon: 'lexicon.json',
   music: 'assets/track.mp3',      // or { file: 'assets/track.mp3', volume: -3 }
   size: '4k',                     // or '1080p' (the default)
-  layout: 'vertical-phone',       // or 'landscape' (the default)
+  layout: 'vertical-phone',       // or 'vertical-desktop', or 'landscape' (the default)
 });
 ```
 
@@ -96,8 +96,13 @@ The shape of the video.
   frame with a status bar. The camera zooms less, since the phone already fills the frame's width. Scenes stack: the
   opening words sit above the app, badges form one column, the closing card's links stack.
 
-This only looks good if the app has a usable mobile layout: one that doesn't scroll sideways at 430 pixels wide. A
-cut written for desktop may need changes too, where buttons move on a small screen (for example into a ☰ menu).
+  This only looks good if the app has a usable mobile layout: one that doesn't scroll sideways at 430 pixels wide. A
+  cut written for desktop may need changes too, where buttons move on a small screen (for example into a ☰ menu).
+- `'vertical-desktop'`: 1080×1920, the app at desktop size (1920×1080, captured at 2×), drawn larger than the frame is
+  wide. The frame shows a slice of the window about 860 app pixels across, at full height, with room for captions
+  under it; the camera moves to each action, and between actions it stays where the last one was instead of going back
+  to the middle. It works for any app, including desktop-only ones, and the same cut works unchanged; what's on screen
+  at once is a part of the page, so overview moments (a whole dashboard) show less than in landscape.
 
 Record again after changing `layout`: a take recorded for one layout can't be rendered in another, and `render` says
 so. `size: '4k'` works with it (2160×3840).
