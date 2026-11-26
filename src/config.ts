@@ -54,24 +54,27 @@ export const PALETTE = { accent: '#5eead4' };
 
 let loaded: Config | undefined;
 
-/** The project's config (showpilot.config.ts in the project folder). */
-export async function loadConfig(): Promise<Config> {
-  if (loaded) return loaded;
+/** A module's URL; `fresh` makes Node load it again rather than reuse the copy it imported before. */
+const moduleUrl = (file: string, fresh: boolean) => `${pathToFileURL(file).href}${fresh ? `?v=${Date.now()}` : ''}`;
+
+/** The project's config (showpilot.config.ts in the project folder). `fresh` reads it again after an edit. */
+export async function loadConfig(fresh = false): Promise<Config> {
+  if (loaded && !fresh) return loaded;
   const file = path.join(PROJECT, 'showpilot.config.ts');
   if (!existsSync(file)) throw new Error(`No showpilot.config.ts in ${PROJECT}. Run \`showpilot init\` there, or pass --project <dir>.`);
-  const c = (await import(pathToFileURL(file).href)).default as Config;
+  const c = (await import(moduleUrl(file, fresh))).default as Config;
   if (!c?.app || !c.brand?.name) throw new Error(`${file} must export default defineConfig({ app, brand: { name } })`);
   if (!c.app.url && !c.app.serve) throw new Error(`${file}: set app.url, or app.serve to a folder of static files`);
   loaded = c;
   return c;
 }
 
-/** A cut from the project's cuts/ folder. */
-export async function loadCut(id: string | undefined): Promise<Cut> {
+/** A cut from the project's cuts/ folder. `fresh` reads it again after an edit. */
+export async function loadCut(id: string | undefined, fresh = false): Promise<Cut> {
   if (!id) throw new Error('Which cut? Pass its name, e.g. `showpilot record tour` for cuts/tour.ts');
   const file = path.join(PROJECT, 'cuts', `${id}.ts`);
   if (!existsSync(file)) throw new Error(`No cut named "${id}" (expected ${file})`);
-  const cut = (await import(pathToFileURL(file).href)).default as Cut;
+  const cut = (await import(moduleUrl(file, fresh))).default as Cut;
   if (!cut?.chapters) throw new Error(`${file} must export default cut({ id, title, chapters })`);
   return cut;
 }

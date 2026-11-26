@@ -5,6 +5,7 @@ project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- `showpilot studio` picks up edits: saving the cut or the config while Studio is open writes the plan again and reloads the page, so scene words, holds and branding can be tuned without a restart.
 - Fixed: two errors (a chapter not recorded yet, a line with no narration) told you to run `npm run record` / `npm run voice`, which only exist in Showpilot's own repository; they now say `showpilot record <cut>` / `showpilot voice <cut>`.
 - Fixed: stopping `showpilot` from outside a terminal (an IDE's stop button, `kill`) left the command running (a recording, a render, Studio's server) and its stage lock looked free, so another heavy stage could start alongside it. The launcher now stops the command and everything it started, and holds the lock until it has exited.
 - `showpilot studio <cut>`: preview a recorded cut in Remotion Studio, without rendering. Play it, scrub it and step through frames, with the camera, cursor, captions and narration as they will render.

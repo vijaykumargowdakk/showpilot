@@ -1,4 +1,4 @@
-import { Composition, staticFile } from 'remotion';
+import { Composition, getRemotionEnvironment, staticFile, watchStaticFile } from 'remotion';
 import { FPS, OUT } from '../geometry';
 import type { RenderPlan } from '../plan';
 import { CutVideo } from './CutVideo';
@@ -8,6 +8,14 @@ import { THUMB, Thumbnail, type ThumbnailProps } from './Thumbnail';
 export type CutProps = { cut: string; plan?: RenderPlan; clean?: boolean };
 
 const SAMPLE_THUMBNAIL: ThumbnailProps = { brand: { name: 'Showpilot', highlight: 'pilot' }, shot: '', crop: { x: 0, y: 0, width: 1920, height: 1080 }, lines: ['Your product,', 'on autopilot.'], accentFrom: 1, chips: [] };
+
+// In Studio, `showpilot studio` rewrites the plan when the cut is saved; reloading picks up its new length and content.
+const watched = new Set<string>();
+function reloadOnChange(file: string) {
+  if (!getRemotionEnvironment().isStudio || watched.has(file)) return;
+  watched.add(file);
+  watchStaticFile(file, () => window.location.reload());
+}
 
 export function Root() {
   return (
@@ -22,6 +30,7 @@ export function Root() {
         durationInFrames={FPS}
         defaultProps={{ cut: '' } as CutProps}
         calculateMetadata={async ({ props }) => {
+          reloadOnChange(`${props.cut}/render.json`);
           const plan = (await (await fetch(staticFile(`${props.cut}/render.json`))).json()) as RenderPlan;
           return { durationInFrames: plan.frames, props: { ...props, plan } };
         }}
