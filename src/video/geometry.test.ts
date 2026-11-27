@@ -13,10 +13,10 @@ describe('layouts', () => {
     expect(g.CAPTURE.scale).toBe(1);
   });
 
-  it('fit the window inside the frame, centred across it', () => {
+  it('centre the window across the frame, inside it unless it is meant to be wider', () => {
     for (const layout of LAYOUTS) {
       const g = geometryFor(layout);
-      expect(g.WIN_X).toBeGreaterThanOrEqual(0);
+      if (layout !== 'vertical-desktop') expect(g.WIN_X).toBeGreaterThanOrEqual(0);
       expect(g.WIN_X * 2 + g.WIN.w).toBeCloseTo(g.OUT.w, 6);
       expect(g.CONTENT_Y + g.WIN.h).toBeLessThanOrEqual(g.OUT.h);
       expect(toStage(g, g.VIEW.w, g.VIEW.h)).toEqual({ x: g.WIN_X + g.WIN.w, y: g.CONTENT_Y + g.WIN.h });
@@ -31,6 +31,24 @@ describe('layouts', () => {
     expect(g.CAPTURE.scale).toBeGreaterThanOrEqual(g.K * g.ZOOM.max);
   });
 
+  it('give the vertical desktop layout a slice of a desktop recording, sharp enough to zoom', () => {
+    const g = geometryFor('vertical-desktop');
+    expect(g.OUT).toEqual({ w: 1080, h: 1920 });
+    expect(g.VIEW).toEqual({ w: 1920, h: 1080 });
+    expect(g.WIN.w).toBeGreaterThan(g.OUT.w);
+    expect(g.OUT.h - (g.CONTENT_Y + g.WIN.h)).toBeGreaterThanOrEqual(200);
+    expect(g.CAPTURE.scale).toBeGreaterThanOrEqual(g.K * g.ZOOM.max);
+  });
+
+  it('keep the vertical desktop camera across from the last action between actions', () => {
+    const g = geometryFor('vertical-desktop');
+    const track = cameraTrack([click(1, 1700, 500)], 10, g);
+    const end = track.at(-1)!;
+    expect(end.s).toBeCloseTo(1, 2);
+    expect(end.x).toBeGreaterThan(g.WIDE.x + 400);
+    expect(cameraTrack([click(1, 1700, 500)], 10).at(-1)!.x).toBeCloseTo(geometryFor('landscape').WIDE.x, 2);
+  });
+
   it('keep the camera inside the window and within the layout zoom range', () => {
     for (const layout of LAYOUTS) {
       const g = geometryFor(layout);
@@ -40,7 +58,9 @@ describe('layouts', () => {
         expect(clampCam(c, g)).toEqual(c);
       }
       const end = track.at(-1)!;
-      for (const k of ['s', 'x', 'y'] as const) expect(end[k]).toBeCloseTo(g.WIDE[k], 2);
+      expect(end.s).toBeCloseTo(g.WIDE.s, 2);
+      expect(end.y).toBeCloseTo(g.WIDE.y, 2);
+      if (!g.holdX) expect(end.x).toBeCloseTo(g.WIDE.x, 2);
     }
   });
 });

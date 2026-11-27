@@ -4,10 +4,11 @@ export const FPS = 60;
 
 /**
  * 'landscape': a 1920×1080 video of the app at desktop size. 'vertical-phone': a 1080×1920 video of the app at phone
- * size (its mobile layout), in a phone-shaped frame.
+ * size (its mobile layout), in a phone-shaped frame. 'vertical-desktop': a 1080×1920 video of the app at desktop size,
+ * drawn larger than the frame is wide, with the camera following the action across it.
  */
-export type Layout = 'landscape' | 'vertical-phone';
-export const LAYOUTS: Layout[] = ['landscape', 'vertical-phone'];
+export type Layout = 'landscape' | 'vertical-phone' | 'vertical-desktop';
+export const LAYOUTS: Layout[] = ['landscape', 'vertical-phone', 'vertical-desktop'];
 
 export type Cam = { s: number; x: number; y: number };
 
@@ -31,9 +32,11 @@ export type Geometry = {
   WIDE: Cam;
   /** How far the camera zooms in on an action: beyond `max` the capture's text starts to look soft. */
   ZOOM: { min: number; max: number; focus: number };
+  /** Between actions the camera stays across from the last one instead of returning to the middle. */
+  holdX: boolean;
 };
 
-function geometry(layout: Layout, OUT: Geometry['OUT'], VIEW: Geometry['VIEW'], scale: number, winW: number, titlebar: number, top: number | null, ZOOM: Geometry['ZOOM']): Geometry {
+function geometry(layout: Layout, OUT: Geometry['OUT'], VIEW: Geometry['VIEW'], scale: number, winW: number, titlebar: number, top: number | null, ZOOM: Geometry['ZOOM'], holdX = false): Geometry {
   const K = winW / VIEW.w;
   const WIN = { w: winW, h: VIEW.h * K, titlebar };
   const WIN_X = (OUT.w - WIN.w) / 2;
@@ -52,6 +55,7 @@ function geometry(layout: Layout, OUT: Geometry['OUT'], VIEW: Geometry['VIEW'], 
     TITLEBAR_VIEW: titlebar / K,
     WIDE: { s: 1, x: VIEW.w / 2, y: (OUT.h / 2 - CONTENT_Y) / K },
     ZOOM,
+    holdX,
   };
 }
 
@@ -60,6 +64,9 @@ const GEOMETRY: Record<Layout, Geometry> = {
   // A large phone's width; the height leaves room under the frame for captions. Captured at 3× so the window,
   // drawn at 2×, stays sharp when the camera moves in. The phone already fills the frame's width, so zooms are small.
   'vertical-phone': geometry('vertical-phone', { w: 1080, h: 1920 }, { w: 430, h: 770 }, 3, 860, 44, 110, { min: 1.1, max: 1.3, focus: 1.2 }),
+  // The desktop window at 1.25×: 2400 px wide, so the frame shows a slice about 860 app pixels across at full height,
+  // with room under it for captions. Captured at 2× so the text stays sharp when the camera moves in.
+  'vertical-desktop': geometry('vertical-desktop', { w: 1080, h: 1920 }, { w: 1920, h: 1080 }, 2, 2400, 50, 160, { min: 1.15, max: 1.4, focus: 1.25 }, true),
 };
 
 export const geometryFor = (layout: Layout = 'landscape'): Geometry => GEOMETRY[layout];

@@ -88,8 +88,8 @@ function SideWindow({ plan }: { plan: ChapterPlan }) {
   const g = useGeometry();
   const { OUT, WIN } = g;
   if (isTall(g)) {
-    // Below the words: the app rises in, tilted back a little.
-    const scale = 0.62;
+    // Below the words: the app rises in, tilted back a little, at most 90% of the frame's width.
+    const scale = Math.min(0.62, (0.9 * OUT.w) / WIN.w);
     return (
       <AbsoluteFill style={{ perspective: 2400, opacity: out }}>
         <div style={{ position: 'absolute', left: (OUT.w - WIN.w) / 2, top: OUT.h * 0.4 + float, transformOrigin: '50% 0', transform: `translateY(${(1 - enter) * 700}px) rotateX(${10 + 14 * (1 - enter)}deg) scale(${scale})` }}>
