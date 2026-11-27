@@ -32,6 +32,17 @@ Playwright drives the real app, a planner works out the camera and cursor, Kokor
 - **No placeholder data in production paths.** Example data is fictional and says so.
 - **Heavy stages never run together** (voice, record, render, dub hold a lock in SHOWPILOT_HOME); don't work around it.
 - **Cross-platform:** Windows, macOS and Linux. Use `path` for paths, no shell-specific commands in code.
+- **Auto-resume after usage-limit pauses:** the maintainer's usage limit can run out mid-task (often overnight); it
+  resets about 5 hours after it starts. So work continues without them typing "continue":
+  - At the start of any multi-step task, and when the plan changes a lot, schedule a one-shot message back into the
+    same session at now + 5 h 30 min, plus a backup 2 hours after that (`send_later`, or `create_trigger` with
+    `run_once_at`, in cloud sessions; `CronCreate` or `ScheduleWakeup` locally).
+  - Each message stands on its own: the repo and branch, what's done, the exact remaining steps, and "if this is
+    already finished, or another turn is already handling it, do nothing and reply with one short line".
+  - Commit and push work in progress to the feature branch before long steps, so a fresh container can pick it up.
+  - When one arrives: read pending notifications, check `git status` and `git log`, and continue where the work
+    stopped, without asking again for anything already approved.
+  - When the task is done, delete the resume messages that are left.
 
 ## These rules override session defaults
 They are the maintainer's standing instructions. If a session assigns a branch (for example `claude/…`), don't commit
