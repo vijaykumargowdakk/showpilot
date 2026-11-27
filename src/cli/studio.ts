@@ -27,7 +27,7 @@ const plan = (c: Cut, config: Config) => {
     copyFileSync(music.file, path.join(OUT, src));
     preview = { src, volume: music.volume };
   }
-  return writePlan(c, brandFor(config), preview);
+  return writePlan(c, brandFor(config), config.layout, preview);
 };
 console.log(`planned ${path.relative(OUT, plan(cut, await loadConfig()))}`);
 

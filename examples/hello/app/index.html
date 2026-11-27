@@ -32,6 +32,14 @@
       .bar { height: 12px; border-radius: 999px; background: var(--bg); overflow: hidden; margin-top: 18px; }
       .bar div { height: 100%; background: var(--done); transition: width 0.4s; }
       .empty { color: var(--muted); padding: 24px 4px; }
+      /* Phone-sized screens (the vertical-phone layout records at 430 px wide): one column, tighter spacing. */
+      @media (max-width: 600px) {
+        header { flex-direction: column; align-items: flex-start; gap: 2px; padding: 14px 18px; }
+        main { grid-template-columns: 1fr; gap: 14px; margin: 14px auto; padding: 0 12px; }
+        .panel { padding: 16px; }
+        input[type="text"] { min-width: 0; }
+        .primary { padding: 12px 14px; }
+      }
     </style>
   </head>
   <body>

@@ -7,11 +7,11 @@ import type { Config } from '../config';
 import type { Cut, SceneKind, SceneProps } from '../recorder/script';
 import { OUT } from '../paths.mjs';
 import { beatId, readSeconds, SCENE, voiceoverId } from '../recorder/script';
-import { FPS, WIDE } from './geometry';
+import { FPS, geometryFor, type Geometry, type Layout } from './geometry';
 import { cleanText, estimateCaptions, type Caption } from './subtitles';
 
 type Voice = Record<string, { file: string; duration: number; captions: Caption[] }>;
-type Timeline = { title: string; duration: number; shots: { t: number; file: string }[]; events: (TimelineEvent & { id?: string; keys?: string[]; text?: string })[] };
+type Timeline = { title: string; duration: number; viewport?: { width: number; height: number }; shots: { t: number; file: string }[]; events: (TimelineEvent & { id?: string; keys?: string[]; text?: string })[] };
 
 export type CursorKind = 0 | 1; // 0 arrow, 1 grab
 export type ChapterPlan = {
@@ -55,6 +55,8 @@ export type RenderPlan = {
   frames: number;
   silent?: boolean;
   chapterTitles?: boolean;
+  /** The video's layout (see geometry.ts); plans written before layouts existed are landscape. */
+  layout?: Layout;
   brand: Brand;
   chapters: ChapterPlan[];
   /** Only in plans written by `showpilot studio`: the music to preview in the browser (renders mix it with ffmpeg). */
@@ -139,14 +141,20 @@ function phrasesOf(captions: Caption[], offset: number, duration: number) {
   return phrases;
 }
 
-function loadTimeline(cut: Cut, ci: number, out: string) {
+function loadTimeline(cut: Cut, ci: number, out: string, g: Geometry) {
   const dir = path.join(out, cut.id, `ch${String(ci + 1).padStart(2, '0')}`);
   const file = path.join(dir, 'timeline.json');
   if (!existsSync(file)) throw new Error(`Chapter ${ci + 1} (${cut.chapters[ci].title}) is not recorded yet; run showpilot record ${cut.id}`);
-  return { tl: JSON.parse(readFileSync(file, 'utf8')) as Timeline, frames: path.relative(out, path.join(dir, 'frames')).replaceAll('\\', '/') };
+  const tl = JSON.parse(readFileSync(file, 'utf8')) as Timeline;
+  // The camera and the drawing assume the layout's viewport, so a take recorded for another layout can't be used.
+  const vp = tl.viewport;
+  if (vp && (vp.width !== g.VIEW.w || vp.height !== g.VIEW.h)) {
+    throw new Error(`Chapter ${ci + 1} (${cut.chapters[ci].title}) was recorded at ${vp.width}×${vp.height}, not for the ${g.layout} layout (${g.VIEW.w}×${g.VIEW.h}); run showpilot record ${cut.id} again`);
+  }
+  return { tl, frames: path.relative(out, path.join(dir, 'frames')).replaceAll('\\', '/') };
 }
 
-function sceneChapter(cut: Cut, ci: number, voice: Voice, out: string): ChapterPlan {
+function sceneChapter(cut: Cut, ci: number, voice: Voice, out: string, g: Geometry): ChapterPlan {
   const chapter = cut.chapters[ci];
   const audio: ChapterPlan['audio'] = [];
   const phrases: ChapterPlan['phrases'] = [];
@@ -167,7 +175,7 @@ function sceneChapter(cut: Cut, ci: number, voice: Voice, out: string): ChapterP
   const plan: ChapterPlan = { title: chapter.title, kind: 'scene', scene: chapter.scene, props: chapter.props, words, dir: '', files: [], shot: [], frames, cam: [], cursor: [], ripples: [], keys: [], callouts: [], audio, phrases, lines };
   if (!chapter.broll) return plan;
   // B-roll is shown whole (no camera moves); the take runs at least as long as the scene, so it is cut to fit.
-  const { tl, frames: dir } = loadTimeline(cut, ci, out);
+  const { tl, frames: dir } = loadTimeline(cut, ci, out, g);
   return {
     ...plan,
     dir,
@@ -178,16 +186,16 @@ function sceneChapter(cut: Cut, ci: number, voice: Voice, out: string): ChapterP
   };
 }
 
-function captureChapter(cut: Cut, ci: number, voice: Voice, out: string): ChapterPlan {
+function captureChapter(cut: Cut, ci: number, voice: Voice, out: string, g: Geometry): ChapterPlan {
   const chapter = cut.chapters[ci];
-  const { tl, frames: dir } = loadTimeline(cut, ci, out);
+  const { tl, frames: dir } = loadTimeline(cut, ci, out, g);
   const speed = chapter.speed ?? 1;
   const real = Math.ceil(tl.duration * FPS);
   const frames = Math.ceil(real / speed);
   // Tracks are worked out at real time, then every speed-th frame is kept.
   const pick = <T>(list: T[], width: number) => Array.from({ length: frames }, (_, f) => list.slice(Math.min(real - 1, f * speed) * width, Math.min(real - 1, f * speed) * width + width)).flat();
   // A sped-up chapter holds the wide shot: zooming on every click at 5× reads as jitter.
-  const track = speed > 1 ? Array.from({ length: real }, () => WIDE) : cameraTrack(tl.events, tl.duration);
+  const track = speed > 1 ? Array.from({ length: real }, () => g.WIDE) : cameraTrack(tl.events, tl.duration, g);
   const cam = pick(track.flatMap((k) => [round(k.s, 4), round(k.x), round(k.y)]), 3);
   const cursor = pick(cursorTrack(tl.events, real), 5);
   const shot = pick(shotIndex(tl.shots, real), 1);
@@ -246,17 +254,18 @@ function silentVoice(cut: Cut): Voice {
   return voice;
 }
 
-export function planCut(cut: Cut, brand: Brand): RenderPlan {
+export function planCut(cut: Cut, brand: Brand, layout: Layout = 'landscape'): RenderPlan {
+  const g = geometryFor(layout);
   const out = OUT;
   const voiceFile = path.join(out, cut.id, 'voice', 'voice.json');
   const voice: Voice = cut.silent ? silentVoice(cut) : existsSync(voiceFile) ? JSON.parse(readFileSync(voiceFile, 'utf8')) : {};
-  const chapters = cut.chapters.map((c, ci) => (c.kind === 'scene' ? sceneChapter(cut, ci, voice, out) : captureChapter(cut, ci, voice, out)));
+  const chapters = cut.chapters.map((c, ci) => (c.kind === 'scene' ? sceneChapter(cut, ci, voice, out, g) : captureChapter(cut, ci, voice, out, g)));
   if (cut.chapterTitles) chapters.filter((c) => c.kind === 'capture').forEach((c, i) => (c.number = i + 1));
-  return { cut: cut.id, fps: FPS, frames: chapters.reduce((n, c) => n + c.frames, 0), silent: cut.silent, chapterTitles: cut.chapterTitles, brand, chapters };
+  return { cut: cut.id, fps: FPS, frames: chapters.reduce((n, c) => n + c.frames, 0), silent: cut.silent, chapterTitles: cut.chapterTitles, layout, brand, chapters };
 }
 
-export function writePlan(cut: Cut, brand: Brand, music?: RenderPlan['music']): string {
+export function writePlan(cut: Cut, brand: Brand, layout: Layout = 'landscape', music?: RenderPlan['music']): string {
   const file = path.join(OUT, cut.id, 'render.json');
-  writeFileSync(file, JSON.stringify({ ...planCut(cut, brand), music }));
+  writeFileSync(file, JSON.stringify({ ...planCut(cut, brand, layout), music }));
   return file;
 }

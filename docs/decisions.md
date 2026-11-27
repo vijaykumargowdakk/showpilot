@@ -93,3 +93,11 @@ capture, which only scales text up. `size: '4k'` makes `record` capture at devic
 chapter's timeline so `render` can say when a chapter needs recording again. Vertical 9:16, the other half of #2, is
 left for a decision on layout: record the app at a portrait viewport (its mobile layout) or crop a desktop recording.
 Maintainer's input: asked for the open issues to be completed.
+
+**2026-11-26: Layouts are geometry carried in the plan, and the first vertical one records the app at phone size.**
+The frame, viewport, window and zoom range were module constants; they are now one geometry per layout, chosen in the
+config and written into the render plan, so the recorder, the camera and every composition read the same numbers, and
+landscape renders stay pixel-identical. `vertical-phone` (1080×1920) records the app at 430×770 CSS pixels at 3×
+density, so apps show their mobile layout, drawn at 2× in a phone frame; zooms are smaller because the phone already
+fills the width. Each chapter's timeline keeps its viewport, and planning refuses a take recorded for another layout
+rather than drawing it wrongly. Maintainer's input: chose the phone layout first, then a crop of the desktop recording.

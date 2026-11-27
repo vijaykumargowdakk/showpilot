@@ -7,11 +7,12 @@ import { Background } from './Background';
 import { Mark, Name } from './Brand';
 import { C, FONT, themeVars } from './theme';
 
-export type ThumbnailProps = { brand: Brand; shot: string; crop: Box; lines: string[]; accentFrom: number; chips: string[] };
+/** `viewWidth`: the recording's viewport width in CSS pixels, the units `crop` is in. */
+export type ThumbnailProps = { brand: Brand; shot: string; viewWidth?: number; crop: Box; lines: string[]; accentFrom: number; chips: string[] };
 
 export const THUMB = { w: 1280, h: 720 };
 
-export function Thumbnail({ brand, shot, crop, lines, accentFrom, chips }: ThumbnailProps) {
+export function Thumbnail({ brand, shot, viewWidth = 1920, crop, lines, accentFrom, chips }: ThumbnailProps) {
   const width = 800;
   const k = width / crop.width;
   return (
@@ -22,7 +23,7 @@ export function Thumbnail({ brand, shot, crop, lines, accentFrom, chips }: Thumb
           <div style={{ position: 'absolute', left: 590, top: (THUMB.h - crop.height * k) / 2 + 10, transformOrigin: '0 50%', transform: 'rotateY(14deg) rotateX(2deg)' }}>
             <div style={{ position: 'absolute', inset: -40, background: `radial-gradient(closest-side, color-mix(in srgb, ${C.violet} 55%, transparent), transparent)`, filter: 'blur(20px)' }} />
             <div style={{ position: 'relative', width, height: crop.height * k, overflow: 'hidden', borderRadius: 18, border: `3px solid ${C.violet}`, boxShadow: '0 30px 80px rgba(0,0,0,0.6)' }}>
-              <Img src={staticFile(shot)} style={{ position: 'absolute', left: -crop.x * k, top: -crop.y * k, width: 1920 * k }} />
+              <Img src={staticFile(shot)} style={{ position: 'absolute', left: -crop.x * k, top: -crop.y * k, width: viewWidth * k }} />
             </div>
           </div>
         </AbsoluteFill>

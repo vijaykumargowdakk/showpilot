@@ -13,13 +13,13 @@ const cut = await loadCut(process.argv[2]);
 const spec = cut.thumbnail;
 if (!spec) throw new Error(`${cut.id} has no thumbnail: add thumbnail: { chapter, at, crop, headlines } to the cut`);
 const dir = path.join(OUT, cut.id, `ch${String(spec.chapter).padStart(2, '0')}`);
-const tl = JSON.parse(readFileSync(path.join(dir, 'timeline.json'), 'utf8')) as { shots: { t: number; file: string }[] };
+const tl = JSON.parse(readFileSync(path.join(dir, 'timeline.json'), 'utf8')) as { shots: { t: number; file: string }[]; viewport?: { width: number } };
 const shot = path.relative(OUT, path.join(dir, 'frames', tl.shots.filter((s) => s.t <= spec.at).pop()!.file)).replaceAll('\\', '/');
 const brand = brandFor(config);
 
 await withBundle(`${cut.id}-thumbnail`, async (serveUrl) => {
   for (const [i, headline] of spec.headlines.entries()) {
-    const inputProps = { brand, shot, crop: spec.crop, lines: headline.lines, accentFrom: headline.accentFrom ?? headline.lines.length, chips: spec.chips ?? [] };
+    const inputProps = { brand, shot, viewWidth: tl.viewport?.width ?? 1920, crop: spec.crop, lines: headline.lines, accentFrom: headline.accentFrom ?? headline.lines.length, chips: spec.chips ?? [] };
     const composition = await selectComposition({ serveUrl, id: 'Thumbnail', inputProps, chromiumOptions });
     const output = path.join(OUT, cut.id, `thumbnail-${i + 1}.jpg`);
     await renderStill({ serveUrl, composition, inputProps, output, imageFormat: 'jpeg', jpegQuality: 92, chromiumOptions });

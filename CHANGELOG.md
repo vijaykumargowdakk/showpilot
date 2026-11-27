@@ -5,6 +5,7 @@ project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- Vertical video: `layout: 'vertical-phone'` records the app at a phone's size, so it shows its mobile layout, and renders 1080×1920 in a phone-shaped frame for Shorts, Reels and TikTok. Scenes stack for the tall frame. Rendering a take recorded for another layout now stops with a message to record again. The example app has a mobile layout.
 - 4K: `size: '4k'` in the config records the app at twice the pixel density and renders 3840×2160, so text stays sharp. `render --4k` on a 1080p recording now says its text is only scaled up.
 - `showpilot studio` plays the background music, dipping and fading on the same curve as the render.
 - `showpilot studio` picks up edits: saving the cut or the config while Studio is open writes the plan again and reloads the page, so scene words, holds and branding can be tuned without a restart.

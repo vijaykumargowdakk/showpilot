@@ -29,7 +29,7 @@ if (!existsSync(video)) throw new Error(`Render it first: showpilot render ${cut
 const take = path.resolve(recording);
 if (!existsSync(take)) throw new Error(`No such recording: ${take}`);
 
-const plan = planCut(cut, config.brand);
+const plan = planCut(cut, config.brand, config.layout);
 const slots = lineSlots(cut, plan);
 
 /** Speech in the take: everything that isn't silence (ffmpeg silencedetect). */

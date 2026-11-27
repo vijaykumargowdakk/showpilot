@@ -24,7 +24,7 @@ if (!existsSync(voiceFile)) throw new Error(`Generate the narration first: showp
 const voice: Voice = JSON.parse(readFileSync(voiceFile, 'utf8'));
 
 // The silent plan is the timing the video was rendered with, so it says where every line starts.
-const plan = planCut(cut, config.brand);
+const plan = planCut(cut, config.brand, config.layout);
 const clips = lineSlots(cut, plan).map((s) => {
   const v = voice[s.id];
   if (!v) throw new Error(`No narration for ${s.id}; run showpilot voice ${cut.id}`);

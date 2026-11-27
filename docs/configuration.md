@@ -22,6 +22,7 @@ export default defineConfig({
   lexicon: 'lexicon.json',
   music: 'assets/track.mp3',      // or { file: 'assets/track.mp3', volume: -3 }
   size: '4k',                     // or '1080p' (the default)
+  layout: 'vertical-phone',       // or 'landscape' (the default)
 });
 ```
 
@@ -37,7 +38,7 @@ export default defineConfig({
 | `colorScheme` | `'light'` (default) or `'dark'`, for apps that follow the system theme. |
 | `title` | The text in the window's title bar (default: `brand.name`). Useful when the video's brand isn't the app's name. |
 
-Recordings are 1920×1080 at a pixel density of 1, rendered at 1080p60, unless `size` is `'4k'`.
+Recordings are 1920×1080 at a pixel density of 1, rendered at 1080p60, unless `size` is `'4k'` or `layout` is vertical.
 
 ## `brand`
 
@@ -84,6 +85,22 @@ take about four times as long.
 
 `render --4k` still makes a one-off `<cut>-4k.mp4` from a 1080p recording, but the picture is only scaled up, so text
 is soft; it says so when you use it.
+
+## `layout`
+
+The shape of the video.
+
+- `'landscape'` (the default): 1920×1080, the app at desktop size in a Mac-style window.
+- `'vertical-phone'`: 1080×1920 for YouTube Shorts, Instagram Reels and TikTok. The app is recorded at a large
+  phone's size (430×770 CSS pixels, at 3× pixel density), so it shows its **mobile layout**, inside a phone-shaped
+  frame with a status bar. The camera zooms less, since the phone already fills the frame's width. Scenes stack: the
+  opening words sit above the app, badges form one column, the closing card's links stack.
+
+This only looks good if the app has a usable mobile layout: one that doesn't scroll sideways at 430 pixels wide. A
+cut written for desktop may need changes too, where buttons move on a small screen (for example into a ☰ menu).
+
+Record again after changing `layout`: a take recorded for one layout can't be rendered in another, and `render` says
+so. `size: '4k'` works with it (2160×3840).
 
 ## Environment variables
 

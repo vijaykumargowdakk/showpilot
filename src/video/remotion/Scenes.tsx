@@ -3,6 +3,7 @@
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import type { Brand, ChapterPlan } from '../plan';
 import { Wordmark } from './Brand';
+import { isTall, useGeometry } from './layout';
 import { C, FONT } from './theme';
 
 const matches = (word: string, list: string[]) => list.some((k) => word.toLowerCase().includes(k.toLowerCase()));
@@ -12,17 +13,27 @@ const matches = (word: string, list: string[]) => list.some((k) => word.toLowerC
 export function KineticScene({ plan, brand, side = false }: { plan: ChapterPlan; brand: Brand; side?: boolean }) {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const tall = isTall(useGeometry());
   const p = [...plan.phrases].reverse().find((x) => frame >= x.f - 4);
   if (!p) return null;
   const highlight = [brand.name, ...(plan.props?.highlight ?? [])];
   const out = interpolate(frame, [p.to, p.to + 8], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  // In a tall frame the words sit above the b-roll window instead of beside it.
+  const beside = side && !tall;
   return (
-    <AbsoluteFill style={{ alignItems: side ? 'flex-start' : 'center', justifyContent: 'center', padding: side ? '0 0 0 110px' : '0 160px', opacity: out }}>
-      <div style={{ font: `700 ${side ? 74 : 92}px ${FONT}`, letterSpacing: -1.5, lineHeight: 1.15, textAlign: side ? 'left' : 'center', color: C.ink, width: side ? 700 : undefined }}>
+    <AbsoluteFill
+      style={{
+        alignItems: beside ? 'flex-start' : 'center',
+        justifyContent: side && tall ? 'flex-start' : 'center',
+        padding: beside ? '0 0 0 110px' : side && tall ? '200px 70px 0' : tall ? '0 70px' : '0 160px',
+        opacity: out,
+      }}
+    >
+      <div style={{ font: `700 ${beside ? 74 : tall ? 84 : 92}px ${FONT}`, letterSpacing: -1.5, lineHeight: 1.15, textAlign: beside ? 'left' : 'center', color: C.ink, width: beside ? 700 : undefined }}>
         {p.words.map((w, i) => {
           const s = spring({ frame: frame - w.f + 3, fps, config: { damping: 16, stiffness: 140 } });
           return (
-            <span key={i} style={{ display: 'inline-block', opacity: s, transform: `translateY(${(1 - s) * 40}px)`, color: matches(w.w, highlight) ? C.accent : C.ink, marginRight: side ? 20 : 24 }}>
+            <span key={i} style={{ display: 'inline-block', opacity: s, transform: `translateY(${(1 - s) * 40}px)`, color: matches(w.w, highlight) ? C.accent : C.ink, marginRight: beside ? 20 : 24 }}>
               {w.w}
             </span>
           );
@@ -44,12 +55,14 @@ export function BadgesScene({ plan, brand }: { plan: ChapterPlan; brand: Brand }
   const lift = interpolate(frame, [first - 10, first + 10], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
   const tagline = plan.props?.tagline;
   const tag = tagline ? spring({ frame: frame - at(tagline.after), fps, config: { damping: 14 } }) : 0;
+  // A tall frame stacks the badges in one column under the name.
+  const tall = isTall(useGeometry());
   return (
     <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ transform: `translateY(${-230 * lift}px) scale(${(0.6 + 0.4 * logo) * (1 - 0.35 * lift)})`, opacity: logo }}>
+      <div style={{ transform: `translateY(${(tall ? -560 : -230) * lift}px) scale(${(0.6 + 0.4 * logo) * (1 - 0.35 * lift)})`, opacity: logo }}>
         <Wordmark brand={brand} />
       </div>
-      <div style={{ position: 'absolute', top: 400, display: 'grid', gridTemplateColumns: `repeat(${Math.min(2, badges.length || 1)}, 640px)`, gap: 28 }}>
+      <div style={{ position: 'absolute', top: tall ? 560 : 400, display: 'grid', gridTemplateColumns: tall ? '880px' : `repeat(${Math.min(2, badges.length || 1)}, 640px)`, gap: 28 }}>
         {badges.map((b) => {
           const s = spring({ frame: frame - at(b.word), fps, config: { damping: 12, stiffness: 170 } });
           return (
@@ -86,13 +99,14 @@ export function CtaScene({ plan, brand }: { plan: ChapterPlan; brand: Brand }) {
   const l = spring({ frame: frame - 40, fps, config: { damping: 14 } });
   const end = interpolate(frame, [plan.frames - 30, plan.frames], [1, 0], { extrapolateLeft: 'clamp' });
   const strip = (u: string) => u.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  const tall = isTall(useGeometry());
   return (
     <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center', opacity: end }}>
       <div style={{ transform: `scale(${0.8 + 0.2 * s})`, opacity: s }}>
         <Wordmark brand={brand} />
       </div>
       {plan.props?.line && <div style={{ marginTop: 34, font: `500 44px ${FONT}`, color: C.muted, opacity: s }}>{plan.props.line}</div>}
-      <div style={{ marginTop: 70, display: 'flex', gap: 30, opacity: l, transform: `translateY(${(1 - l) * 30}px)` }}>
+      <div style={{ marginTop: 70, display: 'flex', flexDirection: tall ? 'column' : 'row', alignItems: 'center', gap: 30, opacity: l, transform: `translateY(${(1 - l) * 30}px)` }}>
         {(brand.links ?? []).map(({ label, url }) => (
           <div key={label} style={{ padding: '22px 34px', borderRadius: 18, border: `2px solid ${C.border}`, background: 'rgba(15,42,61,0.7)' }}>
             <div style={{ font: `600 24px ${FONT}`, color: C.accent, textTransform: 'uppercase', letterSpacing: 2 }}>{label}</div>

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { cameraTrack, shots, targetAt, ZOOM, type TimelineEvent } from './camera';
-import { clampCam, WIDE } from './geometry';
+import { clampCam, LANDSCAPE } from './geometry';
+
+const { WIDE } = LANDSCAPE;
 
 const click = (t: number, x: number, y: number, w = 120, h = 40): TimelineEvent => ({ t, type: 'click', x, y, box: { x: x - w / 2, y: y - h / 2, width: w, height: h } });
 
